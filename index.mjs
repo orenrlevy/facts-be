@@ -10,15 +10,12 @@ export const handler = async (event) => {
     body: null,
   };
 
-  console.log("TEST:");
-  console.log(event);
-
   try {
-    console.log("\nTheory: " + event.body.theory)
+    console.log("\nTheory: " + event.body)
 
     const completion = await openai.chat.completions.create({
         messages: [{"role": "system", "content": "Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. Write a one-paragraph analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. Text: ###"},
-            {"role": "user", "content": event.body.theory}],
+            {"role": "user", "content": event.body}],
         model: "gpt-4-1106-preview",
     });
 
@@ -33,7 +30,7 @@ export const handler = async (event) => {
     console.log("\nError:");
     console.log(error);
 
-    response.body = error;
+    response.message = error;
     response.statusCode = 500;
   }
   

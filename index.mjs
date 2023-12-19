@@ -10,6 +10,9 @@ export const handler = async (event) => {
     body: null,
   };
 
+  console.log("TEST:");
+  console.log(event);
+
   try {
     console.log("\nTheory: " + event.body.theory)
 

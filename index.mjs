@@ -9,6 +9,7 @@ export const handler = async (event) => {
     statusCode: null,
     body: null,
   };
+  console.log(event);
   try {
     console.log("\nTheory: " + request.body.theory)
 

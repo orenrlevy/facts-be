@@ -21,7 +21,9 @@ export const handler = async (event) => {
 
     console.log("\nFact: " + completion.choices[0].message.content);
 
-    response.body = completion.choices[0].message.content;
+    response.body = {
+      "fact": completion.choices[0].message.content
+    };
     response.statusCode = 200;
 
   } catch (error) {

@@ -10,6 +10,9 @@ export const handler = async (event) => {
     body: null,
   };
 
+  console.log("\nInput:");
+  console.log(event);
+
   try {
     console.log("\nTheory: " + event.body)
 
@@ -21,20 +24,19 @@ export const handler = async (event) => {
 
     console.log("\nFact: " + completion.choices[0].message.content);
 
+    response.statusCode = 200;
     response.body = {
       "fact": completion.choices[0].message.content
     };
-    response.statusCode = 200;
-
+    return response;
   } catch (error) {
     console.log("\nError:");
     console.log(error);
-
-    response.message = error;
+    
     response.statusCode = 500;
+    response.message = error;
+    return response;
   }
-  
-  return response;
 };
 
 console.log('test');

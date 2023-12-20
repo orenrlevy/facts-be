@@ -34,13 +34,13 @@ export const handler = async (event) => {
     console.log("\nOpenAI:");
     console.log("\nFact: " + openAiResult);
 
-    if (openAiResult.indexOf("knowladge cutof") == -1) {
-      console.log("\nNo 'knowladge cutof' use OpenAI");
+    if (openAiResult.indexOf("knowladge cutoff") === -1) {
+      console.log("\nNo 'knowladge cutoff' use OpenAI");
       response.statusCode = 200;
       response.body = openAiResult;
       return response;
     } else {
-      console.log("\nResponse contains 'knowladge cutof' use Tavily");
+      console.log("\nResponse contains 'knowladge cutoff' use Tavily");
       tavily.query = event.body;
       let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");

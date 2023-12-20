@@ -64,7 +64,7 @@ function makeRequest(host, path, method, body) {
     
     //create the request object with the callback with the result
     const req = https.request(options, (res) => {
-      resolve(JSON.stringify(res.statusCode));
+      resolve(res);
     });
 
     // handle the possible errors

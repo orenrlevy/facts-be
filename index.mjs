@@ -40,7 +40,7 @@ export const handler = async (event) => {
     tavily.query = event.body;
     let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
 
-    console.log(result);
+    console.log("\nFact: " + result.answer);
 
     return result;
   } catch (error) {

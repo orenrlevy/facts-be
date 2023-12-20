@@ -34,7 +34,9 @@ export const handler = async (event) => {
     console.log("\nOpenAI:");
     console.log("\nFact: " + openAiResult);
 
-    if (openAiResult.indexOf("knowladge cutoff") === -1) {
+    if (openAiResult.indexOf("knowladge cutoff") === -1 && 
+        openAiResult.indexOf("As of my last update") === -1
+      ) {
       console.log("\nNo 'knowladge cutoff' use OpenAI");
       response.statusCode = 200;
       response.body = openAiResult;

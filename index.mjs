@@ -73,6 +73,10 @@ function makeRequest(host, path, method, body) {
     req.on('error', (e) => {
       reject(e.message);
     });
+
+    req.on('data', function(chunk) {
+         console.log("Body chunk: " + chunk);
+     });
     
     //do the request
     req.write(JSON.stringify(body));

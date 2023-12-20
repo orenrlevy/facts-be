@@ -38,7 +38,7 @@ export const handler = async (event) => {
     return response;
     */
     tavily.query = event.body;
-    let result = await makeRequest("POST", "api.tavily.com", tavily);
+    let result = await makeRequest("api.tavily.com", "/search", "POST", tavily);
 
     console.log(result);
 
@@ -51,10 +51,11 @@ export const handler = async (event) => {
   }
 };
 
-function makeRequest(method, url, body) {
+function makeRequest(host, path, method, body) {
   return new Promise((resolve, reject) => {
     const options = {
-      host: url,
+      host: host,
+      path: path,
       method: method,
       headers: {
         'Content-Type': 'application/json'

@@ -26,7 +26,7 @@ export const handler = async (event) => {
     console.log("\nTheory: " + event.body);
 
     const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": "Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. Write an analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. I am going to provide a template for writing your analysis. CAPITALIZED WORDS are my placeholders for content. Try to fit the output into one or more of the placeholders that I list. Please preserve the formatting and overall template that I provide. If your output does not contain an indication about the limitations of your knowledge due to your training data cutoff (cases where the response pertains to a topic where updated information post-April 2023 is not critical for accuracy), please include a check mark (✅) at the end of your output . This is the template: TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. SUMMARY - here you will write your analysis in one detailed paragraph."},
+        messages: [{"role": "system", "content": "Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. Write an analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. I am going to provide a template for writing your analysis. CAPITALIZED WORDS are my placeholders for content. Try to fit the output into one or more of the placeholders that I list. Please preserve the formatting and overall template that I provide. This is the template: TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. SUMMARY - here you will write your analysis in one detailed paragraph."},
             {"role": "user", "content": "Text: ### " + event.body + " ###"}],
         model: "gpt-4-1106-preview",
     });
@@ -34,7 +34,22 @@ export const handler = async (event) => {
     console.log("\nOpenAI:");
     console.log("\nFact: " + openAiResult);
 
-    if (openAiResult.indexOf("✅") === -1) {
+    let excuses = ["as of my last training data",
+                    "my knowledge is current up to",
+                    "based on information available until",
+                    "my training includes data only up to",
+                    "data available up to",
+                    "my training data includes information until",
+                    "my training data includes information up until",
+                    "training that concluded",
+                    "my information is current up to",
+                    "data available until",
+                    "my last update was",
+                    "knowledge cutoff"]
+    let lowerCaseResult = openAiResult.toLowerCase();
+    let gotExcuses = excuses.some((excuse)=>lowerCaseResult.indexOf(excuse)!==-1);
+
+    if (!gotExcuses) {
       console.log("\nNo 'knowladge cutoff' use OpenAI");
       response.statusCode = 200;
       response.body = openAiResult;

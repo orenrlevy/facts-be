@@ -65,6 +65,7 @@ function makeRequest(host, path, method, body) {
     //create the request object with the callback with the result
     const req = https.request(options, (res) => {
       console.log("HERE: " + res);
+      //console.log("BODY: " + res.body);
       resolve(res);
     });
 

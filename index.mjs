@@ -24,25 +24,29 @@ export const handler = async (event) => {
   };
   try {
     console.log("\nTheory: " + event.body);
-    
-    /*
-    //Open AI
+
     const completion = await openai.chat.completions.create({
         messages: [{"role": "system", "content": "Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. Write a one-paragraph analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. Text: ###"},
             {"role": "user", "content": event.body}],
         model: "gpt-4-1106-preview",
     });
-    console.log("\nFact: " + completion.choices[0].message.content);
-    response.statusCode = 200;
-    response.body = completion.choices[0].message.content;
-    return response;
-    */
-    tavily.query = event.body;
-    let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
+    let openAiResult = completion.choices[0].message.content; 
+    console.log("\nOpenAI:");
+    console.log("\nFact: " + openAiResult);
 
-    console.log("\nFact: " + result.answer);
-
-    return result;
+    if (openAiResult.indexOf("knowladge cutof") == -1) {
+      console.log("\nNo 'knowladge cutof' use OpenAI");
+      response.statusCode = 200;
+      response.body = openAiResult;
+      return response;
+    } else {
+      console.log("\nResponse contains 'knowladge cutof' use Tavily");
+      tavily.query = event.body;
+      let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
+      console.log("\nTavily:");
+      console.log("\nFact: " + result.answer);
+      return result.answer;
+    }
   } catch (error) {
     console.log("\nError: " + error);
     response.statusCode = 500;

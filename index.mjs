@@ -38,7 +38,7 @@ export const handler = async (event) => {
     return response;
     */
     tavily.query = event.body;
-    let result = await makeRequest("api.tavily.com", "/search", "POST", tavily);
+    let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
 
     console.log(result);
 
@@ -51,35 +51,38 @@ export const handler = async (event) => {
   }
 };
 
-function makeRequest(host, path, method, body) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      host: host,
-      path: path,
-      method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-    
-    //create the request object with the callback with the result
-    const req = https.request(options, (res) => {
-      resolve(res.body);
+function postRequest(host, path, method, body) {
+  const options = {
+    hostname: host,
+    path: path,
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
 
-      res.on('data', function(chunk) {
-         console.log("Body chunk: " + chunk);
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      let rawData = '';
+
+      res.on('data', chunk => {
+        rawData += chunk;
+      });
+
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(rawData));
+        } catch (err) {
+          reject(new Error(err));
+        }
       });
     });
 
-    // handle the possible errors
-    req.on('error', (e) => {
-      reject(e.message);
+    req.on('error', err => {
+      reject(new Error(err));
     });
-    
-    //do the request
-    req.write(JSON.stringify(body));
 
-    //finish the request
+    req.write(JSON.stringify(body));
     req.end();
   });
-};
+}

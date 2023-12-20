@@ -64,19 +64,17 @@ function makeRequest(host, path, method, body) {
     
     //create the request object with the callback with the result
     const req = https.request(options, (res) => {
-      console.log("HERE: " + res);
-      console.log("BODY: " + res.body);
       resolve(res.body);
+
+      res.on('data', function(chunk) {
+         console.log("Body chunk: " + chunk);
+      });
     });
 
     // handle the possible errors
     req.on('error', (e) => {
       reject(e.message);
     });
-
-    req.on('data', function(chunk) {
-         console.log("Body chunk: " + chunk);
-     });
     
     //do the request
     req.write(JSON.stringify(body));

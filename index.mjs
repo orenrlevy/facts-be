@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-const https = require('https');
+import * as http from 'http';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY

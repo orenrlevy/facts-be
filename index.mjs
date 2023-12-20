@@ -11,7 +11,7 @@ let tavily = {
   "search_depth": "basic",
   "include_answer": true,
   "include_images": false,
-  "include_raw_content": true,
+  "include_raw_content": false,
   "max_results": 10,
   "include_domains": [],
   "exclude_domains": []
@@ -64,7 +64,8 @@ function makeRequest(host, path, method, body) {
     
     //create the request object with the callback with the result
     const req = https.request(options, (res) => {
-      resolve(res.body);
+      console.log("HERE: " + res);
+      resolve(res);
     });
 
     // handle the possible errors

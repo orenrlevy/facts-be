@@ -17,6 +17,26 @@ let tavily = {
   "exclude_domains": []
 };
 
+const promptPrefix = `Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. 
+                      If the assertions in the text can only be verified by training on data post April 2023 add “training on data post April 2023 is critical for verification” at the end of your output. 
+                      Write an analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. 
+                      I am going to provide a template for writing your analysis. 
+                      CAPITALIZED WORDS are my placeholders for content. 
+                      Try to fit the output into one or more of the placeholders that I list. 
+                      Please preserve the formatting and overall template that I provide below. 
+                      Use the below template twice. 
+                      In the first instance, use a fact checker personality in your writing style. 
+                      In the second instance, use John Oliver\'s style. 
+                      This is the template: 
+                        TLDR - here you will provide the bottom line verdict of your analysis. 
+                        It can be as short as one word such as “true” or “false” or as long as one sentence. 
+                        X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. 
+                        Hence this summary will be no longer than 280 characters. 
+                        Always start with the question: “VeReally?
+                        ”SUMMARY - here you will write your analysis in one detailed paragraph.`
+const inputPrefix = " Text: ### ";
+const inputSuffix = " ###";
+
 export const handler = async (event) => {
   let response = {
     statusCode: null,
@@ -26,8 +46,8 @@ export const handler = async (event) => {
     console.log("\nTheory: " + event.body);
 
     const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": "Assume the role of a fact-checker tasked with assessing the validity of the claims presented in the following text. If the assertions in the text can only be verified by training on data post April 2023 add “training on data post April 2023 is critical for verification” at the end of your output. Write an analysis comparing the key points in the text to established knowledge on the subject matter, highlighting any inconsistencies or contradictions between the text's assertions and widely recognized information. I am going to provide a template for writing your analysis. CAPITALIZED WORDS are my placeholders for content. Try to fit the output into one or more of the placeholders that I list. Please preserve the formatting and overall template that I provide below. Use the below template twice. In the first instance, use a fact checker personality in your writing style. In the second instance, use John Oliver\'s style. This is the template: TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?”SUMMARY - here you will write your analysis in one detailed paragraph. "},
-            {"role": "user", "content": "Text: ### " + event.body + " ###"}],
+        messages: [{"role": "system", "content": promptPrefix},
+            {"role": "user", "content": inputPrefix + event.body + inputSuffix}],
         model: "gpt-4-1106-preview",
     });
     let openAiResult = completion.choices[0].message.content; 
@@ -35,6 +55,7 @@ export const handler = async (event) => {
     console.log("\nFact: " + openAiResult);
 
     let excuses = ["as of my last training data",
+                    "as of my last update",
                     "my knowledge is current up to",
                     "based on information available until",
                     "my training includes data only up to",
@@ -57,7 +78,7 @@ export const handler = async (event) => {
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
-      tavily.query = event.body;
+      tavily.query = promptPrefix + inputPrefix + event.body + inputSuffix;
       let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + result.answer);

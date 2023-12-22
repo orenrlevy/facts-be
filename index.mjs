@@ -45,7 +45,8 @@ export const handler = async (event) => {
                     "my information is current up to",
                     "data available until",
                     "my last update was",
-                    "knowledge cutoff"]
+                    "knowledge cutoff",
+                    "training on data post april 2023 is critical for verification"]
     let lowerCaseResult = openAiResult.toLowerCase();
     let gotExcuses = excuses.some((excuse)=>lowerCaseResult.indexOf(excuse)!==-1);
 

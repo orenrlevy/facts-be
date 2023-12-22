@@ -27,7 +27,7 @@ const promptPrefix = `Assume the role of a fact-checker tasked with assessing th
                       Use the below template twice. 
                       In the first instance, use a fact checker personality in your writing style. 
                       In the second instance, use John Oliver's style. 
-                      Seperate the two styles with "%%%SEPERATOR%%%"
+                      Seperate the two styles with "%%%SEPERATOR%%%" and don't provide titles of the personality type.
 
                       This is the template: 
                         TLDR - here you will provide the bottom line verdict of your analysis. 

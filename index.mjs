@@ -43,18 +43,19 @@ export const handler = async (event) => {
     body: null,
   };
   try {
-    console.log("\nTheory: " + event.body);
+    const input = JSON.parse(event.body);
+    console.log("\nTheory: " + input.theory);
 
     const completion = await openai.chat.completions.create({
         messages: [{"role": "system", "content": promptPrefix},
-            {"role": "user", "content": inputPrefix + event.body + inputSuffix}],
+            {"role": "user", "content": inputPrefix + input.theory + inputSuffix}],
         model: "gpt-4-1106-preview",
     });
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");
     console.log("\nFact: " + openAiResult);
 
-    let excuses = ["as of my last training data",
+    let excuses = [/*"as of my last training data",
                     "as of my last update",
                     "my knowledge is current up to",
                     "based on information available until",
@@ -66,7 +67,7 @@ export const handler = async (event) => {
                     "my information is current up to",
                     "data available until",
                     "my last update was",
-                    "knowledge cutoff",
+                    "knowledge cutoff",*/
                     "training on data post april 2023 is critical for verification"]
     let lowerCaseResult = openAiResult.toLowerCase();
     let gotExcuses = excuses.some((excuse)=>lowerCaseResult.indexOf(excuse)!==-1);
@@ -78,7 +79,7 @@ export const handler = async (event) => {
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
-      tavily.query = promptPrefix + inputPrefix + event.body + inputSuffix;
+      tavily.query = promptPrefix + inputPrefix + input.theory + inputSuffix;
       let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + result.answer);

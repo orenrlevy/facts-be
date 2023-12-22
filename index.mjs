@@ -50,10 +50,11 @@ export const handler = async (event) => {
     const promptBody = promptPrefixA + 
                         ((input.funny) ? promptPrefixFunny : promptPrefixNotFunny) + 
                         promptPrefixB + input.theory + inputSuffix;
+    const promptTheory = inputPrefix + input.theory + inputSuffix;
 
     const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptPrefix},
-            {"role": "user", "content": promptBody}],
+        messages: [{"role": "system", "content": promptBody},
+            {"role": "user", "content": promptTheory}],
         model: "gpt-4-1106-preview",
     });
     let openAiResult = completion.choices[0].message.content; 
@@ -84,7 +85,7 @@ export const handler = async (event) => {
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
-      tavily.query = promptPrefix + promptBody;
+      tavily.query = promptBody + promptTheory;
       let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + result.answer);

@@ -47,8 +47,11 @@ export const handler = async (event) => {
   try {
     const input = JSON.parse(event.body);
     console.log("\nTheory: " + input.theory);
+
+    console.log("\nFunny Mode: " + input.funny_mode);
+
     const promptBody = promptPrefixA + 
-                        ((input.funny) ? promptPrefixFunny : promptPrefixNotFunny) + 
+                        ((input.funny_mode) ? promptPrefixFunny : promptPrefixNotFunny) + 
                         promptPrefixB + input.theory + inputSuffix;
     const promptTheory = inputPrefix + input.theory + inputSuffix;
 

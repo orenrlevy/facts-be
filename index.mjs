@@ -127,8 +127,10 @@ function postRequest(host, path, method, body) {
 
       res.on('end', () => {
         try {
+          console.log('GS: ' + rawData);
           resolve(JSON.parse(rawData));
         } catch (err) {
+          console.log('FW: ' + err);
           reject(new Error(err));
         }
       });

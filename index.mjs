@@ -101,7 +101,7 @@ export const handler = async (event) => {
       } else {
         console.log("\nTavili query length OVER 400! Length: " + taviliQuery.length);
         const summarization = await openai.chat.completions.create({
-          messages: [{"role": "system", "content": "You are a text summarizer, helping optimize statments length by returning a shorter version which is less than 400 charecters, without loosing the original core content of the input"},
+          messages: [{"role": "system", "content": "You are a text summarizer, helping optimize statments length by returning a shorter version which is up to 370 charecters, without loosing the original core content of the input. please return just the summarization itself with no additions."},
               {"role": "user", "content": taviliQuery}],
           model: "gpt-3.5-turbo"
         });

@@ -90,7 +90,7 @@ export const handler = async (event) => {
     if (!gotExcuses) {
       console.log("\nNo 'knowladge cutoff' use OpenAI");
       response.statusCode = 200;
-      response.body = openAiResult;
+      response.body = JSON.stringify({'fact':openAiResult});
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
@@ -130,7 +130,9 @@ export const handler = async (event) => {
       let openAiReFormat = reFormat.choices[0].message.content;
       console.log("\nTavili output in our format: " + openAiReFormat)
 
-      return openAiReFormat;
+      response.statusCode = 200;
+      response.body = JSON.stringify({'fact':openAiReFormat, 'sources':taviliResult.results});
+      return response;
     }
   } catch (error) {
     console.log("\nError: " + error);

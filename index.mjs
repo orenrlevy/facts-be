@@ -42,6 +42,15 @@ const inputPrefix = " Text: ### ";
 const inputSuffix = " ###";
 
 export const handler = async (event) => {
+  /* Flow:
+    1. try asking chat gpt - if the answer is good, return to user.
+    2. if the answer contains disclaimers - 
+      2.1 check if the query is over 400 chars - if so, ask gpt to minimize
+      2.2 ask tavili to fetch the query with recent data
+      2.3 ask gpt to format the answer in our format
+      2.4 return to user
+  */
+
   let response = {
     statusCode: null,
     body: null,
@@ -85,7 +94,22 @@ export const handler = async (event) => {
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
-      tavily.query = promptPrefixTavili + promptTheory;
+
+      const taviliQuery = input.theory;
+      if (taviliQuery.length <= 400) {
+        console.log("\nTavili query length under 400");
+      } else {
+        console.log("\nTavili query length OVER 400!");
+        const summarization = await openai.chat.completions.create({
+          messages: [{"role": "system", "content": "You are a text summarizer, helping optimize statments length by returning a shorter version which is less than 400 charecters, without loosing the original core content of the input"},
+              {"role": "user", "content": taviliQuery}],
+          model: "gpt-3.5-turbo"
+        });
+        let openAiSum = summarization.choices[0].message.content; 
+      }
+      
+
+      tavily.query = promptTheory;
       let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + result.answer);

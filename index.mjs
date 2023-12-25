@@ -107,7 +107,8 @@ export const handler = async (event) => {
         });
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + taviliQuery);
-        console.log("Optimized Query : " + openAiSum);
+        console.log("Optimized Query: " + openAiSum);
+        console.log("Optimized Query Length: " + openAiSum.length);
         taviliQuery = openAiSum;
       }
       

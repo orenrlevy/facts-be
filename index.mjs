@@ -95,25 +95,41 @@ export const handler = async (event) => {
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
 
-      const taviliQuery = input.theory;
+      let taviliQuery = input.theory;
       if (taviliQuery.length <= 400) {
         console.log("\nTavili query length under 400");
       } else {
-        console.log("\nTavili query length OVER 400!");
+        console.log("\nTavili query length OVER 400! Length: " + taviliQuery.length);
         const summarization = await openai.chat.completions.create({
           messages: [{"role": "system", "content": "You are a text summarizer, helping optimize statments length by returning a shorter version which is less than 400 charecters, without loosing the original core content of the input"},
               {"role": "user", "content": taviliQuery}],
           model: "gpt-3.5-turbo"
         });
-        let openAiSum = summarization.choices[0].message.content; 
+        let openAiSum = summarization.choices[0].message.content;
+        console.log("Original Query: " + taviliQuery);
+        console.log("Optimized Query : " + openAiSum);
+        taviliQuery = openAiSum;
       }
       
-
       tavily.query = promptTheory;
-      let result = await postRequest("api.tavily.com", "/search", "POST", tavily);
+      let taviliResult = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + result.answer);
-      return result.answer;
+
+      const reFormat = await openai.chat.completions.create({
+        messages: [{"role": "system", "content": `
+          You are a text formetter, you get a fact as the input and format it to fit the following template. 
+          This is the template: 
+          TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. 
+          X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?” as the first word after “X”.
+          SUMMARY - here you will write your analysis in one detailed paragraph.`},
+            {"role": "user", "content": taviliResult}],
+        model: "gpt-3.5-turbo"
+      });
+      let openAiReFormat = reFormat.choices[0].message.content;
+      console.log("\nTavili output in our format: " + openAiReFormat)
+
+      return openAiReFormat;
     }
   } catch (error) {
     console.log("\nError: " + error);

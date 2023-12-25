@@ -111,7 +111,7 @@ export const handler = async (event) => {
         taviliQuery = openAiSum;
       }
       
-      tavily.query = promptTheory;
+      tavily.query = taviliQuery;
       let taviliResult = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + taviliResult.answer);

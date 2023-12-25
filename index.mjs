@@ -125,7 +125,7 @@ export const handler = async (event) => {
           X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?” as the first word after “X”.
           SUMMARY - here you will write your analysis in one detailed paragraph.`},
             {"role": "user", "content": taviliResult.answer}],
-        model: "gpt-3.5-turbo"
+        model: "gpt-4-1106-preview"
       });
       let openAiReFormat = reFormat.choices[0].message.content;
       console.log("\nTavili output in our format: " + openAiReFormat)

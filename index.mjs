@@ -114,7 +114,7 @@ export const handler = async (event) => {
       tavily.query = promptTheory;
       let taviliResult = await postRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
-      console.log("\nFact: " + result.answer);
+      console.log("\nFact: " + taviliResult.answer);
 
       const reFormat = await openai.chat.completions.create({
         messages: [{"role": "system", "content": `
@@ -123,7 +123,7 @@ export const handler = async (event) => {
           TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. 
           X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?” as the first word after “X”.
           SUMMARY - here you will write your analysis in one detailed paragraph.`},
-            {"role": "user", "content": taviliResult}],
+            {"role": "user", "content": taviliResult.answer}],
         model: "gpt-3.5-turbo"
       });
       let openAiReFormat = reFormat.choices[0].message.content;

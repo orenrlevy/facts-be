@@ -152,7 +152,7 @@ export const handler = async (event) => {
 };
 
 function factPartsExtraction(fact) {
-  let sumSplit = str.split('SUMMARY - ');
+  let sumSplit = fact.split('SUMMARY - ');
   let sumText = sumSplit[1];
   let xSplit = sumSplit[0].split('X - ');
   let xText = xSplit[1];

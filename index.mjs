@@ -90,7 +90,11 @@ export const handler = async (event) => {
     if (!gotExcuses) {
       console.log("\nNo 'knowladge cutoff' use OpenAI");
       response.statusCode = 200;
-      response.body = JSON.stringify({'fact':openAiResult});
+      let factExtraction = factPartsExtraction(openAiResult);
+      response.body = JSON.stringify({
+        'fact':openAiResult,
+        ...factExtraction
+      });
       return response;
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
@@ -131,7 +135,12 @@ export const handler = async (event) => {
       console.log("\nTavili output in our format: " + openAiReFormat)
 
       response.statusCode = 200;
-      response.body = JSON.stringify({'fact':openAiReFormat, 'sources':taviliResult.results});
+      let factExtraction = factPartsExtraction(openAiReFormat);
+      response.body = JSON.stringify({
+        'fact':openAiReFormat, 
+        'sources':taviliResult.results,
+        ...factExtraction
+      });
       return response;
     }
   } catch (error) {
@@ -141,6 +150,20 @@ export const handler = async (event) => {
     return response;
   }
 };
+
+function factPartsExtraction(fact) {
+  let sumSplit = str.split('SUMMARY - ');
+  let sumText = sumSplit[1];
+  let xSplit = sumSplit[0].split('X - ');
+  let xText = xSplit[1];
+  let tldr = xSplit[0].split('TLDR - ')[1];
+
+  return {
+    'tldr': tldr,
+    'sum': sumText,
+    'x': xText
+  }
+}
 
 function postRequest(host, path, method, body) {
   const options = {

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import * as https from 'https';
-import {promptPrefix, promptPrefixTavili} from './prompts.js';
+import {promptPrefix, promptPrefixTavili} from './prompts.mjs';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -17,8 +17,6 @@ let tavily = {
   "include_domains": [],
   "exclude_domains": []
 };
-
-
 
 const inputPrefix = " Text: ### ";
 const inputSuffix = " ###";

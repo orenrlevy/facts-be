@@ -106,7 +106,7 @@ export const handler = async (event) => {
       } else {
         console.log("\nTavili query length OVER 400! Length: " + taviliQuery.length);
         const summarization = await openai.chat.completions.create({
-          messages: [{"role": "system", "content": "PProvide a summary in under 400 characters for the given text, omitting any non-essential details. Create 100 versions. Pipe them through a strict filter that only provides summaries with a maximum of 400 characters. Return only the best result."},
+          messages: [{"role": "system", "content": "Provide a summary in under 400 characters for the given text, omitting any non-essential details. Create 100 versions. Pipe them through a strict filter that only provides summaries with a maximum of 400 characters. Return only the best result."},
               {"role": "user", "content": promptTheory}],
           model: "gpt-4-1106-preview"
         });
@@ -115,6 +115,11 @@ export const handler = async (event) => {
         console.log("Optimized Query: " + openAiSum);
         console.log("Optimized Query Length: " + openAiSum.length);
         taviliQuery = openAiSum;
+      }
+
+      if (taviliQuery.length < 5) {
+        console.log("\nTavili query length under 5!");
+        taviliQuery = taviliQuery.padEnd(5,'.')
       }
       
       tavily.query = taviliQuery;

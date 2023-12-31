@@ -97,6 +97,8 @@ export const handler = async (event) => {
     let theorySum = await theorySummarization(theory);
     let theoryQuery = encodeURI(theorySum.trim());
 
+    console.log(theoryQuery);
+
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders);    
 
     console.log(braveResult)
@@ -203,13 +205,15 @@ function factPartsExtraction(fact) {
 function makeRequest(host, path, method, body, pathParams, headers) {
   const options = {
     hostname: host,
-    path: path + (pathParams ? pathParams : ""),
+    path: path + (pathParams ? "?"+pathParams : ""),
     method: method,
     headers: {
       'Content-Type': 'application/json',
       ...headers
     },
   };
+
+  console.log(options);
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, res => {

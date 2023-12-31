@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize} from './prompts.mjs';
+import { ungzip } from 'pako';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -99,7 +100,7 @@ export const handler = async (event) => {
 
     console.log(theoryQuery);
 
-    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders);    
+    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
     console.log(braveResult)
 
@@ -202,7 +203,7 @@ function factPartsExtraction(fact) {
   }
 }
 
-function makeRequest(host, path, method, body, pathParams, headers) {
+function makeRequest(host, path, method, body, pathParams, headers, ungzip) {
   const options = {
     hostname: host,
     path: path + (pathParams ? "?"+pathParams : ""),
@@ -225,6 +226,9 @@ function makeRequest(host, path, method, body, pathParams, headers) {
 
       res.on('end', () => {
         try {
+          if(ungzip) {
+            rawData = ungzip(rawData);
+          }
           console.log('Post Output: ' + rawData);
           resolve(JSON.parse(rawData));
         } catch (err) {

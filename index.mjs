@@ -94,12 +94,9 @@ export const handler = async (event) => {
     let theory = input.theory;
     console.log("\nTheory: " + theory);
 
-    let theorySum = theorySummarization(theory);
-    console.log("theorySum : " + theorySum);
-    let theoryQuery = encodeURI(theorySum);
-    console.log("theoryQuery : " + theoryQuery);
+    let theorySum = await theorySummarization(theory);
+    let theoryQuery = encodeURI(theorySum.trim());
 
-    
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders);    
 
     console.log(braveResult)
@@ -165,7 +162,7 @@ export const OldHandler = async (event) => {
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
 
-      tavily.query = theorySummarization(input.theory);
+      tavily.query = await theorySummarization(input.theory);
       let taviliResult = await makeRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + taviliResult.answer);

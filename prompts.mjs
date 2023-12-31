@@ -32,6 +32,6 @@ const promptSummarize = `Provide a summary in under 400 characters for the given
                           Pipe them through a strict filter that only provides summaries with a maximum of 400 characters. 
                           Return only the best result.`;
 
-const promptSupport = `\n\nBeafore answering, please read this up to date verified information found online, and take it into account in your response: `;
+const promptSupport = `\n\nBefore answering, please read this up to date information found online, and take it into account in your response: `;
                           
 export {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport};

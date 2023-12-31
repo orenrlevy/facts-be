@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import * as https from 'https';
-import {promptPrefix, promptPrefixTavili} from './prompts.mjs';
+import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize} from './prompts.mjs';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -86,7 +86,7 @@ export const handler = async (event) => {
       } else {
         console.log("\nTavili query length OVER 400! Length: " + taviliQuery.length);
         const summarization = await openai.chat.completions.create({
-          messages: [{"role": "system", "content": "Provide a summary in under 400 characters for the given text, omitting any non-essential details. Create 100 versions. Pipe them through a strict filter that only provides summaries with a maximum of 400 characters. Return only the best result."},
+          messages: [{"role": "system", "content": promptSummarize},
               {"role": "user", "content": promptTheory}],
           model: "gpt-4-1106-preview"
         });
@@ -108,12 +108,7 @@ export const handler = async (event) => {
       console.log("\nFact: " + taviliResult.answer);
 
       const reFormat = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": `
-          You are a text formetter, you get a fact as the input and format it to fit the following template. 
-          This is the template: 
-          TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. 
-          X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?” as the first word after “X”.
-          SUMMARY - here you will write your analysis in one detailed paragraph.`},
+        messages: [{"role": "system", "content": promptFormatter},
             {"role": "user", "content": taviliResult.answer}],
         model: "gpt-4-1106-preview"
       });

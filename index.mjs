@@ -115,7 +115,9 @@ export const handler = async (event) => {
 
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
-    let supportingInfo = promptSupport + extraceBrave(braveResult);
+    let braveInfo = extraceBrave(braveResult);
+    console.log('\nSupporting Info: ' + braveInfo);
+    let supportingInfo = promptSupport + braveInfo;
 
     const promptTheory = inputPrefix + theory + inputSuffix;
 
@@ -132,7 +134,7 @@ export const handler = async (event) => {
     let factExtraction = factPartsExtraction(openAiResult);
     response.body = JSON.stringify({
       'fact':openAiResult, 
-      'sources':braveResult.web.results
+      'sources':braveResult.web.results,
       ...factExtraction
     });
     return response;

@@ -227,7 +227,7 @@ function makeRequest(host, path, method, body, pathParams, headers, ungzip) {
       res.on('end', () => {
         try {
           if(ungzip) {
-            rawData = ungzip(rawData);
+            rawData = unzip(rawData);
           }
           console.log('Post Output: ' + rawData);
           resolve(JSON.parse(rawData));

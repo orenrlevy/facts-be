@@ -20,7 +20,7 @@ let tavily = {
 
 let braveHeaders = {
   'Accept-Encoding': 'gzip',
-  'X-Subscription-Token': process.env.TAVILY_SECRET_KEY
+  'X-Subscription-Token': process.env.BRAVE_SECRET_KEY
 }
 
 const inputPrefix = " Text: ### ";

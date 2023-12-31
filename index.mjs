@@ -18,10 +18,91 @@ let tavily = {
   "exclude_domains": []
 };
 
+let braveHeaders = {
+  'Accept-Encoding': 'gzip',
+  'X-Subscription-Token': process.env.TAVILY_SECRET_KEY
+}
+
 const inputPrefix = " Text: ### ";
 const inputSuffix = " ###";
 
+function theorySummarization(theory) {
+  const promptTheory = inputPrefix + theory + inputSuffix;
+  let output = theory;
+  try {
+      if (theory.length <= 400) {
+        console.log("\nTheory length under 400");
+        if (theory.length < 5) {
+          console.log("\nTheory length under 5!");
+          output = theory.padEnd(5,'.')
+        }
+      } else {
+        console.log("\nTheory OVER 400! Length: " + theory.length);
+        const summarization = await openai.chat.completions.create({
+          messages: [{"role": "system", "content": promptSummarize},
+              {"role": "user", "content": promptTheory}],
+          model: "gpt-4-1106-preview"
+        });
+        let openAiSum = summarization.choices[0].message.content;
+        console.log("Original Query: " + theory);
+        console.log("Original Query Length: " + theory.length);
+        console.log("Optimized Query: " + openAiSum);
+        console.log("Optimized Query Length: " + openAiSum.length);
+        output = openAiSum;
+      }
+      return output;      
+    } catch (error) {
+      console.log("\nError: " + error);
+      response.statusCode = 500;
+      response.message = error;
+      return response;
+    }
+}
+
+function theoryFormmating(fact) {
+  try {
+    const reFormat = await openai.chat.completions.create({
+        messages: [{"role": "system", "content": promptFormatter},
+            {"role": "user", "content": fact}],
+        model: "gpt-4-1106-preview"
+      });
+      let openAiReFormat = reFormat.choices[0].message.content;
+      console.log("\nTavili output in our format: " + openAiReFormat);
+      return openAiReFormat;
+    } catch (error) {
+      console.log("\nError: " + error);
+      response.statusCode = 500;
+      response.message = error;
+      return response;
+    }
+}
+
+
 export const handler = async (event) => {
+  /* Flow:
+    1. If text over 400 chars -> ask gpt to minimize
+    2. Ask brave for up to date information
+    3. Ask GPT for query with the additions made
+  */
+
+  let response = {
+    statusCode: null,
+    body: null,
+  };
+
+  const input = JSON.parse(event.body);
+    let theory = input.theory;
+    console.log("\nTheory: " + theory);
+
+    let braveQuery = encodeURI(theorySummarization(theory).trim());
+    
+    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, braveQuery, braveHeaders);    
+
+    console.log(braveResult)
+
+};
+
+export const OldHandler = async (event) => {
   /* Flow:
     1. try asking chat gpt - if the answer is good, return to user.
     2. if the answer contains disclaimers - 
@@ -80,40 +161,12 @@ export const handler = async (event) => {
     } else {
       console.log("\nResponse contains 'knowladge cutoff' use Tavily");
 
-      let taviliQuery = input.theory;
-      if (taviliQuery.length <= 400) {
-        console.log("\nTavili query length under 400");
-      } else {
-        console.log("\nTavili query length OVER 400! Length: " + taviliQuery.length);
-        const summarization = await openai.chat.completions.create({
-          messages: [{"role": "system", "content": promptSummarize},
-              {"role": "user", "content": promptTheory}],
-          model: "gpt-4-1106-preview"
-        });
-        let openAiSum = summarization.choices[0].message.content;
-        console.log("Original Query: " + taviliQuery);
-        console.log("Optimized Query: " + openAiSum);
-        console.log("Optimized Query Length: " + openAiSum.length);
-        taviliQuery = openAiSum;
-      }
-
-      if (taviliQuery.length < 5) {
-        console.log("\nTavili query length under 5!");
-        taviliQuery = taviliQuery.padEnd(5,'.')
-      }
-      
-      tavily.query = taviliQuery;
-      let taviliResult = await postRequest("api.tavily.com", "/search", "POST", tavily);
+      tavily.query = theorySummarization(input.theory);
+      let taviliResult = await makeRequest("api.tavily.com", "/search", "POST", tavily);
       console.log("\nTavily:");
       console.log("\nFact: " + taviliResult.answer);
 
-      const reFormat = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptFormatter},
-            {"role": "user", "content": taviliResult.answer}],
-        model: "gpt-4-1106-preview"
-      });
-      let openAiReFormat = reFormat.choices[0].message.content;
-      console.log("\nTavili output in our format: " + openAiReFormat)
+      let openAiReFormat = theoryFormmating(taviliResult.answer)
 
       response.statusCode = 200;
       let factExtraction = factPartsExtraction(openAiReFormat);
@@ -146,13 +199,14 @@ function factPartsExtraction(fact) {
   }
 }
 
-function postRequest(host, path, method, body) {
+function makeRequest(host, path, method, body, pathParams, headers) {
   const options = {
     hostname: host,
-    path: path,
+    path: path + (pathParams ?  : ""),
     method: method,
     headers: {
       'Content-Type': 'application/json',
+      ...headers
     },
   };
 

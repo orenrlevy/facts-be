@@ -94,7 +94,8 @@ export const handler = async (event) => {
     let theory = input.theory;
     console.log("\nTheory: " + theory);
 
-    let braveQuery = encodeURI(theorySummarization(theory).trim());
+    console.log(theorySummarization(theory));
+    let braveQuery = encodeURI(theorySummarization(theory));
     
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, braveQuery, braveHeaders);    
 

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import * as https from 'https';
-import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize} from './prompts.mjs';
+import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 
 const openai = new OpenAI({
@@ -78,6 +78,21 @@ async function theoryFormmating(fact) {
     }
 }
 
+function extraceBrave(input) {
+  let output = "";
+  input.web.results.forEach((result)=>{
+    output += "\n\nSource:"+result.title+" URL: " +result.url;
+    if (result.description) {
+      output += "\nContent: "+result.description;
+    }
+    if (result.faq) {
+      result.faq.items.forEach((faq)=>{
+        output += "\nFAQ: Question" + faq.question + " Answer: " + faq.answer;
+      })
+    }
+  });
+  return output;
+}
 
 export const handler = async (event) => {
   /* Flow:
@@ -100,11 +115,22 @@ export const handler = async (event) => {
 
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
-    braveResult.web.results.forEach(item=>{console.log("result: " + item)});
+    let supportingInfo = promptSupport + extraceBrave(braveResult);
+
+    const promptTheory = inputPrefix + theory + inputSuffix;
+
+    const completion = await openai.chat.completions.create({
+        messages: [{"role": "system", "content": promptPrefix + "\n" + supportingInfo},
+            {"role": "user", "content": promptTheory}],
+        model: "gpt-4-1106-preview",
+    });
+    let openAiResult = completion.choices[0].message.content; 
+    console.log("\nOpenAI:");
+    console.log("\nFact: " + openAiResult);
 
     response.statusCode = 200;
     response.body = JSON.stringify({
-      'fact':braveResult, 
+      'fact':openAiResult, 
       'sources':braveResult.web.results
     });
     return response;

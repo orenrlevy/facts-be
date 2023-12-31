@@ -26,7 +26,7 @@ let braveHeaders = {
 const inputPrefix = " Text: ### ";
 const inputSuffix = " ###";
 
-function theorySummarization(theory) {
+async function theorySummarization(theory) {
   const promptTheory = inputPrefix + theory + inputSuffix;
   let output = theory;
   try {
@@ -59,7 +59,7 @@ function theorySummarization(theory) {
     }
 }
 
-function theoryFormmating(fact) {
+async function theoryFormmating(fact) {
   try {
     const reFormat = await openai.chat.completions.create({
         messages: [{"role": "system", "content": promptFormatter},
@@ -202,7 +202,7 @@ function factPartsExtraction(fact) {
 function makeRequest(host, path, method, body, pathParams, headers) {
   const options = {
     hostname: host,
-    path: path + (pathParams ?  : ""),
+    path: path + (pathParams ? pathParams : ""),
     method: method,
     headers: {
       'Content-Type': 'application/json',

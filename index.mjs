@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize} from './prompts.mjs';
+import zlib from 'zlib';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY

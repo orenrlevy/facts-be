@@ -94,10 +94,13 @@ export const handler = async (event) => {
     let theory = input.theory;
     console.log("\nTheory: " + theory);
 
-    console.log(theorySummarization(theory));
-    let braveQuery = encodeURI(theorySummarization(theory));
+    let theorySum = theorySummarization(theory);
+    console.log("theorySum : " + theorySum);
+    let theoryQuery = encodeURI(theorySum);
+    console.log("theoryQuery : " + theoryQuery);
+
     
-    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, braveQuery, braveHeaders);    
+    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders);    
 
     console.log(braveResult)
 
@@ -221,10 +224,10 @@ function makeRequest(host, path, method, body, pathParams, headers) {
 
       res.on('end', () => {
         try {
-          console.log('Tavili Output: ' + rawData);
+          console.log('Post Output: ' + rawData);
           resolve(JSON.parse(rawData));
         } catch (err) {
-          console.log('Tavili Error: ' + err);
+          console.log('Post Error: ' + err);
           reject(new Error(err));
         }
       });

@@ -203,7 +203,7 @@ function factPartsExtraction(fact) {
   }
 }
 
-function makeRequest(host, path, method, body, pathParams, headers, ungzip) {
+function makeRequest(host, path, method, body, pathParams, headers, extractGzip) {
   const options = {
     hostname: host,
     path: path + (pathParams ? "?"+pathParams : ""),
@@ -226,8 +226,8 @@ function makeRequest(host, path, method, body, pathParams, headers, ungzip) {
 
       res.on('end', () => {
         try {
-          if(ungzip) {
-            rawData = unzip(rawData);
+          if(extractGzip) {
+            rawData = ungzip(rawData);
           }
           console.log('Post Output: ' + rawData);
           resolve(JSON.parse(rawData));

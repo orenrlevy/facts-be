@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize} from './prompts.mjs';
-import { ungzip } from 'pako';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -218,24 +217,35 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, res => {
-      let rawData = '';
-
-      res.on('data', chunk => {
-        rawData += chunk;
-      });
-
-      res.on('end', () => {
-        try {
-          if(extractGzip) {
-            rawData = ungzip(rawData);
-          }
-          console.log('Post Output: ' + rawData);
-          resolve(JSON.parse(rawData));
-        } catch (err) {
+      if (extractGzip) {
+        var buffer = [];
+        var gunzip = zlib.createGunzip();            
+        res.pipe(gunzip);
+        gunzip.on('data', function(data) {
+          buffer.push(data.toString())
+        }).on("end", function() {
+          resolve(JSON.parse(buffer.join("")));
+        }).on("error", function(e) {
           console.log('Post Error: ' + err);
-          reject(new Error(err));
-        }
-      });
+          reject(e);
+        })
+      } else {
+        let rawData = '';
+        res.on('data', chunk => {
+          rawData += chunk;
+        });
+        res.on('end', () => {
+          try {
+            console.log('Post Output: ' + rawData);
+            resolve(JSON.parse(rawData));
+          } catch (err) {
+            console.log('Post Error: ' + err);
+            reject(new Error(err));
+          }
+        });
+      }
+
+      
     });
 
     req.on('error', err => {

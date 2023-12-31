@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "openai": "^4.23.0",
-    "pako": "^2.1.0",
     "readline-sync": "^1.4.10",
     "zlib": "^1.0.5"
   }

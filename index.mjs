@@ -98,12 +98,14 @@ export const handler = async (event) => {
     let theorySum = await theorySummarization(theory);
     let theoryQuery = "q="+encodeURI(theorySum.trim());
 
-    console.log(theoryQuery);
-
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
-    console.log(braveResult)
-
+    response.statusCode = 200;
+    response.body = JSON.stringify({
+      'fact':braveResult, 
+      'sources':braveResult.web.results
+    });
+    return response;
 };
 
 export const OldHandler = async (event) => {
@@ -213,8 +215,6 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
       ...headers
     },
   };
-
-  console.log(options);
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, res => {

@@ -100,6 +100,8 @@ export const handler = async (event) => {
 
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
+    braveResult.web.results.forEach(item=>{console.log("result: " + item)});
+
     response.statusCode = 200;
     response.body = JSON.stringify({
       'fact':braveResult, 

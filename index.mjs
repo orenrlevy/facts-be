@@ -120,7 +120,7 @@ export const handler = async (event) => {
     const promptTheory = inputPrefix + theory + inputSuffix;
 
     const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptPrefix + "\n" + supportingInfo},
+        messages: [{"role": "system", "content": promptPrefix + supportingInfo},
             {"role": "user", "content": promptTheory}],
         model: "gpt-4-1106-preview",
     });
@@ -129,9 +129,11 @@ export const handler = async (event) => {
     console.log("\nFact: " + openAiResult);
 
     response.statusCode = 200;
+    let factExtraction = factPartsExtraction(openAiResult);
     response.body = JSON.stringify({
       'fact':openAiResult, 
       'sources':braveResult.web.results
+      ...factExtraction
     });
     return response;
 };

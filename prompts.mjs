@@ -13,13 +13,7 @@ const promptPrefix = `Assume the role of a fact-checker tasked with assessing th
   This is the template: 
   TLDR - here you will provide the bottom line verdict of your analysis. It can be as short as one word such as “true” or “false” or as long as one sentence. 
   X - here you will write your analysis in a format that fits X (previously known as Twitter) limits. Hence this summary will be no longer than 280 characters. Always start with the question: “VeReally?” as the first word after “X”.
-  SUMMARY - here you will write your analysis in one detailed paragraph.
-
-  CURRENT EVENTS - include this section only if the assertions in the text are likely to be influenced by data post April 2023. 
-  If the assertions in the text are likely to be influenced by data post April 2023, write only one sentence in English: “training on data post April 2023 is critical for verification” in this section. 
-  Do not translate it even if the provided text is not in English. Information that  typically requires post-April 2023 data includes recent events, updated statistics, or new scientific research. 
-  If the assertions in the text are not likely to be affected by data post April 2023, do not include this section and do not write anything here. 
-  So, do not include the 'CURRENT EVENTS' section unless there are clear indicators based on your training data that it's necessary.`;
+  SUMMARY - here you will write your analysis in one detailed paragraph.`;
 
 const promptPrefixTavili = `Fact-checker: Assess text accuracy. 
   Compare with known facts, highlight contradictions. 

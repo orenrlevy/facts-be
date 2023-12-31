@@ -107,37 +107,37 @@ export const handler = async (event) => {
   };
 
   const input = JSON.parse(event.body);
-    let theory = input.theory;
-    console.log("\nTheory: " + theory);
+  let theory = input.theory;
+  console.log("\nTheory: " + theory);
 
-    let theorySum = await theorySummarization(theory);
-    let theoryQuery = "q="+encodeURI(theorySum.trim());
+  let theorySum = await theorySummarization(theory);
+  let theoryQuery = "q="+encodeURI(theorySum.trim());
 
-    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
+  let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
-    let braveInfo = extraceBrave(braveResult);
-    console.log('\nSupporting Info: ' + braveInfo);
-    let supportingInfo = promptSupport + braveInfo;
+  let braveInfo = extraceBrave(braveResult);
+  console.log('\nSupporting Info: ' + braveInfo);
+  let supportingInfo = promptSupport + braveInfo;
 
-    const promptTheory = inputPrefix + theory + inputSuffix;
+  const promptTheory = inputPrefix + theory + inputSuffix;
 
-    const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptPrefix + supportingInfo},
-            {"role": "user", "content": promptTheory}],
-        model: "gpt-4-1106-preview",
-    });
-    let openAiResult = completion.choices[0].message.content; 
-    console.log("\nOpenAI:");
-    console.log("\nFact: " + openAiResult);
+  const completion = await openai.chat.completions.create({
+      messages: [{"role": "system", "content": promptPrefix + supportingInfo},
+          {"role": "user", "content": promptTheory}],
+      model: "gpt-4-1106-preview",
+  });
+  let openAiResult = completion.choices[0].message.content; 
+  console.log("\nOpenAI:");
+  console.log("\nFact: " + openAiResult);
 
-    response.statusCode = 200;
-    let factExtraction = factPartsExtraction(openAiResult);
-    response.body = JSON.stringify({
-      'fact':openAiResult, 
-      'sources':braveResult.web.results,
-      ...factExtraction
-    });
-    return response;
+  response.statusCode = 200;
+  let factExtraction = factPartsExtraction(openAiResult);
+  response.body = JSON.stringify({
+    'fact':openAiResult, 
+    'sources':braveResult.web.results,
+    ...factExtraction
+  });
+  return response;
 };
 
 export const OldHandler = async (event) => {

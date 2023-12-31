@@ -95,7 +95,7 @@ export const handler = async (event) => {
     console.log("\nTheory: " + theory);
 
     let theorySum = await theorySummarization(theory);
-    let theoryQuery = encodeURI(theorySum.trim());
+    let theoryQuery = "q="+encodeURI(theorySum.trim());
 
     console.log(theoryQuery);
 

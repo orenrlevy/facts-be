@@ -147,7 +147,7 @@ export const handler = async (event) => {
       'sum': theorySum === theory ? "" : theorySum
     },
     'web': {
-      'brave_info': braveResult.web.results
+      'brave_info': braveResult.web.results.length
     },
     'output' : {
       'fact':openAiResult,

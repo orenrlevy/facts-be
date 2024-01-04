@@ -137,6 +137,24 @@ export const handler = async (event) => {
     'sources':braveResult.web.results,
     ...factExtraction
   });
+
+  console.log({
+    'timestamp': new Date(),
+    'level': 'DEBUG', 
+    'theory': {
+      'original': theory,
+      'length': theory.length,
+      'sum': theorySum === theory ? "" : theorySum
+    },
+    'web': {
+      'brave_info': braveResult.web.results
+    },
+    'output' : {
+      'fact':openAiResult,
+      ...factExtraction
+    }
+  })
+
   return response;
 };
 

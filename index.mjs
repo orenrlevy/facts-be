@@ -144,6 +144,7 @@ export const handler = async (event) => {
     'theory': {
       'original': theory,
       'length': theory.length,
+      'sum_needed': theory.length >= 400 ? true : false,
       'sum': theorySum === theory ? "" : theorySum
     },
     'web': {

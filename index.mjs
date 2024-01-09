@@ -20,7 +20,7 @@ const openAiExtraConf = {
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.AZURE_SECRET_KEY,
+  apiKey: process.env.OPENAI_SECRET_KEY,
   api_type: "azure",
   api_base: "https://fact-check.openai.azure.com/",
   api_version: "2023-07-01-preview",

@@ -1,14 +1,11 @@
-import { OpenAI } from "openai";
+import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 
-/*
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
-*/
-
 const openAiExtraConf = {
   'temperature':0.7, //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
   //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
@@ -18,13 +15,6 @@ const openAiExtraConf = {
   'stop':'None', //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
   'model': 'gpt-4-1106-preview'
 }
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_SECRET_KEY,
-  api_type: "azure",
-  api_base: "https://fact-check.openai.azure.com/",
-  api_version: "2023-07-01-preview"
-});
 
 let tavily = {
   "api_key": process.env.TAVILY_SECRET_KEY,
@@ -84,7 +74,7 @@ async function theoryFormmating(fact) {
     const reFormat = await openai.chat.completions.create({
         messages: [{"role": "system", "content": promptFormatter},
             {"role": "user", "content": fact}],
-          ...openAiExtraConf
+        ...openAiExtraConf
       });
       let openAiReFormat = reFormat.choices[0].message.content;
       console.log("\nTavili output in our format: " + openAiReFormat);

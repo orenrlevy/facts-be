@@ -172,6 +172,28 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
+  console.log({
+    'timestamp': new Date(),
+    'level': 'DEBUG',
+    'theory': {
+      'original': theory,
+      'length': theory.length,
+      'sum_needed': theory.length >= 400 ? true : false,
+      'sum': theorySum === theory ? "" : theorySum
+    },
+    'web': {
+      'brave_info': braveResult.web.results.length
+    },
+    'output' : {
+      'fact':openAiResult.toString(),
+      ...factExtraction
+    },
+    'model': completion.model, 
+    'usage': {
+      ...completion.usage
+    }
+  });
+
   cloudWatchLogger({
     'timestamp': new Date(),
     'level': 'DEBUG',
@@ -377,15 +399,20 @@ async function cloudWatchLogger(message) {
   const logStreams = res.logStreams;
   const sequenceToken = logStreams[0].uploadSequenceToken;
 
+  console.log("-----HERE-----")
+  console.log(res);
+  console.log(logStreams);
+  console.log(sequenceToken);
+
   // putLogEvents 
   const putLogParams = {
-  logEvents: [{
-      message: JSON.stringify(message),
-      timestamp: new Date().getTime()
-    }],
-    logGroupName: "fact-checker",
-    logStreamName: "fact-checker",
-    sequenceToken
+    logEvents: [{
+        message: JSON.stringify(message),
+        timestamp: new Date().getTime()
+      }],
+      logGroupName: "fact-checker",
+      logStreamName: "fact-checker",
+      sequenceToken
   };
 
   return await cloudwatchlogs.putLogEvents(putLogParams).promise();

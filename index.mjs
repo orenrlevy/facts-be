@@ -1,11 +1,28 @@
-import OpenAI from "openai";
+//import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 
+/*
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
+*/
+
+let azureParams = {
+  'host': 'fact-check.openai.azure.com',
+  'path': '/openai/deployments/vereally/chat/completions',
+  'method': 'POST',
+  'body': {
+    messages: [],
+    ...openAiExtraConf
+  },
+  'pathParams': 'api-version=2023-05-15',
+  'headers': {
+    'api-key': process.env.AZURE_SECRET_KEY,
+  }
+}
+
 const openAiExtraConf = {
   'temperature':0.7, //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
   //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
@@ -48,11 +65,13 @@ async function theorySummarization(theory) {
         }
       } else {
         console.log("\nTheory OVER 400! Length: " + theory.length);
-        const summarization = await openai.chat.completions.create({
-          messages: [{"role": "system", "content": promptSummarize},
-              {"role": "user", "content": promptTheory}],
-          ...openAiExtraConf
-        });
+        
+        azureParams.body.messages = [
+          {"role": "system", "content": promptSummarize},
+          {"role": "user", "content": promptTheory}
+        ];
+        const summarization = await makeRequest(...azureParams);
+
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + theory);
         console.log("Original Query Length: " + theory.length);
@@ -71,20 +90,22 @@ async function theorySummarization(theory) {
 
 async function theoryFormmating(fact) {
   try {
-    const reFormat = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptFormatter},
-            {"role": "user", "content": fact}],
-        ...openAiExtraConf
-      });
-      let openAiReFormat = reFormat.choices[0].message.content;
-      console.log("\nTavili output in our format: " + openAiReFormat);
-      return openAiReFormat;
-    } catch (error) {
+
+    azureParams.body.messages = [
+      {"role": "system", "content": promptFormatter},
+      {"role": "user", "content": fact}
+    ];
+    const reFormat = await makeRequest(...azureParams);
+
+    let openAiReFormat = reFormat.choices[0].message.content;
+    console.log("\nTavili output in our format: " + openAiReFormat);
+    return openAiReFormat;
+  } catch (error) {
       console.log("\nError: " + error);
       response.statusCode = 500;
       response.message = error;
       return response;
-    }
+  }
 }
 
 function extraceBrave(input) {
@@ -130,11 +151,12 @@ export const handler = async (event) => {
 
   const promptTheory = inputPrefix + theory + inputSuffix;
 
-  const completion = await openai.chat.completions.create({
-      messages: [{"role": "system", "content": promptPrefix + supportingInfo},
-          {"role": "user", "content": promptTheory}],
-      ...openAiExtraConf
-  });
+  azureParams.body.messages = [
+    {"role": "system", "content": promptPrefix + supportingInfo},
+    {"role": "user", "content": promptTheory}
+  ];
+  const completion = await makeRequest(...azureParams);
+
   let openAiResult = completion.choices[0].message.content; 
   console.log("\nOpenAI:");
   console.log("\nFact: " + openAiResult);
@@ -187,11 +209,12 @@ export const OldHandler = async (event) => {
     console.log("\nTheory: " + input.theory);
     const promptTheory = inputPrefix + input.theory + inputSuffix;
 
-    const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content": promptPrefix},
-            {"role": "user", "content": promptTheory}],
-        ...openAiExtraConf
-    });
+    azureParams.body.messages = [
+      {"role": "system", "content": promptPrefix},
+      {"role": "user", "content": promptTheory}
+    ];
+    const completion = await makeRequest(...azureParams);
+
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");
     console.log("\nFact: " + openAiResult);

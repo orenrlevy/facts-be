@@ -173,7 +173,7 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
-  logger({
+  let a = await logger({
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {
@@ -354,8 +354,6 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
           }
         });
       }
-
-      
     });
 
     req.on('error', err => {

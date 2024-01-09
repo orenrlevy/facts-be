@@ -184,7 +184,7 @@ export const handler = async (event) => {
       'brave_info': braveResult.web.results.length
     },
     'output' : {
-      'fact':openAiResult,
+      'fact':openAiResult.toString(),
       ...factExtraction
     },
     'model': completion.model, 

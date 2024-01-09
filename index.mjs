@@ -172,7 +172,7 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
-  console.log({
+  cloudWatchLogger({
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {
@@ -192,7 +192,7 @@ export const handler = async (event) => {
     'usage': {
       ...completion.usage
     }
-  })
+  });
 
   return response;
 };
@@ -364,7 +364,7 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
   });
 }
 
-async function CloudWatchLogger(message) {
+async function cloudWatchLogger(message) {
     const cloudwatchlogs = new aws.CloudWatchLogs();
 
     // describeLogStreams to get sequenceToken

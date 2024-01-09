@@ -70,7 +70,7 @@ async function theorySummarization(theory) {
           {"role": "system", "content": promptSummarize},
           {"role": "user", "content": promptTheory}
         ];
-        const summarization = await makeRequest(...azureParams);
+        const summarization = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
 
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + theory);
@@ -95,7 +95,7 @@ async function theoryFormmating(fact) {
       {"role": "system", "content": promptFormatter},
       {"role": "user", "content": fact}
     ];
-    const reFormat = await makeRequest(...azureParams);
+    const reFormat = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
 
     let openAiReFormat = reFormat.choices[0].message.content;
     console.log("\nTavili output in our format: " + openAiReFormat);
@@ -155,7 +155,7 @@ export const handler = async (event) => {
     {"role": "system", "content": promptPrefix + supportingInfo},
     {"role": "user", "content": promptTheory}
   ];
-  const completion = await makeRequest(...azureParams);
+  const completion = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
 
   let openAiResult = completion.choices[0].message.content; 
   console.log("\nOpenAI:");
@@ -213,7 +213,7 @@ export const OldHandler = async (event) => {
       {"role": "system", "content": promptPrefix},
       {"role": "user", "content": promptTheory}
     ];
-    const completion = await makeRequest(...azureParams);
+    const completion = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
 
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");

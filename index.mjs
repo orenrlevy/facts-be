@@ -291,14 +291,14 @@ function factPartsExtraction(fact) {
 
 function getPrediction(messages, source){
   if (source === sources.openai) {
-    console.log("\n ChatGPT Source: Open AI");
+    console.log("\n ChatGPT used from: Open AI");
     return openai.chat.completions.create({
       messages: messages,
       ...openAiExtraConf
     });
 
   } else if (source === sources.azure) {
-    console.log("\n ChatGPT Source: Azure");
+    console.log("\n ChatGPT used from: Azure");
     return makeAzureRequest(messages);
   }
 }

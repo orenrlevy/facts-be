@@ -4,6 +4,7 @@ import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, prom
 import zlib from 'zlib';
 import aws from 'aws-sdk';
 
+const cloudwatchlogs = new aws.CloudWatchLogs();
 /*
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -195,7 +196,8 @@ export const handler = async (event) => {
   };
 
   console.log(logOutput);
-  await cloudWatchLogger(logOutput);
+  await cloudWatchLogger(logOutput,"fact-checker","fact-checker");
+  await cloudWatchLogger(theory,"theory","theory");
 
   return response;
 };
@@ -367,16 +369,14 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
   });
 }
 
-async function cloudWatchLogger(message) {
-  const cloudwatchlogs = new aws.CloudWatchLogs();
-
+async function cloudWatchLogger(message, group, stream) {
   const putLogParams = {
     logEvents: [{
         message: JSON.stringify(message),
         timestamp: new Date().getTime()
       }],
-      logGroupName: "fact-checker",
-      logStreamName: "fact-checker",
+      logGroupName: group,
+      logStreamName: stream,
   };
 
   return await cloudwatchlogs.putLogEvents(putLogParams).promise();

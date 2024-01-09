@@ -196,7 +196,7 @@ export const handler = async (event) => {
   };
 
   console.log(logOutput);
-  await cloudWatchLogger(logOutput,"fact-checker","fact-checker");
+  await cloudWatchLogger(JSON.stringify(logOutput),"fact-checker","fact-checker");
   await cloudWatchLogger(theory,"theory","theory");
 
   return response;
@@ -372,7 +372,7 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
 async function cloudWatchLogger(message, group, stream) {
   const putLogParams = {
     logEvents: [{
-        message: JSON.stringify(message),
+        message: message,
         timestamp: new Date().getTime()
       }],
       logGroupName: group,

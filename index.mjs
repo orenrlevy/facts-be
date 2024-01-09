@@ -173,7 +173,7 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
-  logger({
+  console.log({
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {
@@ -364,9 +364,6 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
     req.end();
   });
 }
-
-
-//https://adelachao.medium.com/aws-sending-cloudwatch-custom-logs-from-lambda-node-js-e0379ea7a34c
 
 async function logger(message) {
     const cloudwatchlogs = new aws.CloudWatchLogs();

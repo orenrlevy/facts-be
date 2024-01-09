@@ -365,29 +365,28 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
 }
 
 async function cloudWatchLogger(message) {
-    const cloudwatchlogs = new aws.CloudWatchLogs();
+  const cloudwatchlogs = new aws.CloudWatchLogs();
 
-    // describeLogStreams to get sequenceToken
-    const describeParams = {
-        limit: 1,
-        logGroupName: "fact-checker",
-        logStreamNamePrefix: "test"
-    }
+  // describeLogStreams to get sequenceToken
+  const describeParams = {
+    limit: 1,
+    logGroupName: "fact-checker"
+  }
 
-    const res = await cloudwatchlogs.describeLogStreams(describeParams).promise();
-    const logStreams = res.logStreams;
-    const sequenceToken = logStreams[0].uploadSequenceToken;
+  const res = await cloudwatchlogs.describeLogStreams(describeParams).promise();
+  const logStreams = res.logStreams;
+  const sequenceToken = logStreams[0].uploadSequenceToken;
 
-    // putLogEvents 
-    const putLogParams = {
-    logEvents: [{
-        message: JSON.stringify(message),
-        timestamp: new Date().getTime()
-        }],
-        logGroupName: "fact-checker",
-        logStreamName: "fact-checker",
-        sequenceToken
-    };
+  // putLogEvents 
+  const putLogParams = {
+  logEvents: [{
+      message: JSON.stringify(message),
+      timestamp: new Date().getTime()
+    }],
+    logGroupName: "fact-checker",
+    logStreamName: "fact-checker",
+    sequenceToken
+  };
 
-    return await cloudwatchlogs.putLogEvents(putLogParams).promise();
+  return await cloudwatchlogs.putLogEvents(putLogParams).promise();
 };

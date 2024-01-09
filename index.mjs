@@ -16,15 +16,15 @@ const openAiExtraConf = {
   'top_p':0.95, //Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model’s token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both.
   'frequency_penalty':0, //Reduce the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response.
   'presence_penalty':0, //Reduce the chance of repeating any token that has appeared in the text at all so far. This increases the likelihood of introducing new topics in a response. (0-2)
-  'stop':'None' //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
+  'stop':'None', //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
+  'model': 'gpt-4-1106-preview'
 }
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY,
   api_type: "azure",
   api_base: "https://fact-check.openai.azure.com/",
-  api_version: "2023-07-01-preview",
-  model: "gpt-4-1106-preview"
+  api_version: "2023-07-01-preview"
 });
 
 let tavily = {

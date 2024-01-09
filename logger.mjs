@@ -1,4 +1,4 @@
-import aws  from 'aws-sdk';
+import aws from 'aws-sdk';
 //https://adelachao.medium.com/aws-sending-cloudwatch-custom-logs-from-lambda-node-js-e0379ea7a34c
 
 exports.logger = async (message) => {

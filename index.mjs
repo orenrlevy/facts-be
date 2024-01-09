@@ -2,6 +2,7 @@
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
+import logger from './logger';
 
 /*
 const openai = new OpenAI({
@@ -171,7 +172,7 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
-  console.log({
+  logger({
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {

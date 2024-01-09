@@ -160,7 +160,7 @@ export const handler = async (event) => {
   ], sources.azure);
 
   let openAiResult = completion.choices[0].message.content; 
-  console.log("\nOpenAI:");
+  console.log("\nChatGPT:");
   console.log("\nFact: " + openAiResult);
 
   response.statusCode = 200;
@@ -291,12 +291,14 @@ function factPartsExtraction(fact) {
 
 function getPrediction(messages, source){
   if (source === sources.openai) {
+    console.log("\n Source: Open AI");
     return openai.chat.completions.create({
       messages: messages,
       ...openAiExtraConf
     });
 
   } else if (source === sources.azure) {
+    console.log("\n Source: Azure");
     return makeAzureRequest(messages);
   }
 }

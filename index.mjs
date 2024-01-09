@@ -21,7 +21,7 @@ const openAiExtraConf = {
   'frequency_penalty':0, //Reduce the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response.
   'presence_penalty':0, //Reduce the chance of repeating any token that has appeared in the text at all so far. This increases the likelihood of introducing new topics in a response. (0-2)
   'stop':'None', //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
-  'model': 'gpt-4-1106-preview'
+  'model': 'gpt-4-1106-preview' //only relevant for open ai
 }
 
 let azureParams = {

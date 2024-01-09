@@ -173,7 +173,7 @@ export const handler = async (event) => {
 
   console.log({
     'timestamp': new Date(),
-    'level': 'DEBUG', 
+    'level': 'DEBUG',
     'theory': {
       'original': theory,
       'length': theory.length,
@@ -187,6 +187,7 @@ export const handler = async (event) => {
       'fact':openAiResult,
       ...factExtraction
     },
+    'model': completion.model, 
     'usage': {
       ...completion.usage
     }

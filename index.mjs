@@ -1,11 +1,31 @@
-import OpenAI from "openai";
+import {Configuration, OpenAI } from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 
+/*
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
+*/
+
+const openAiExtraConf = {
+  'engine':'vereally',
+  'temperature':'0.7', //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
+  //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
+  'top_p':0.95, //Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model’s token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both.
+  'frequency_penalty':0, //Reduce the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response.
+  'presence_penalty':0, //Reduce the chance of repeating any token that has appeared in the text at all so far. This increases the likelihood of introducing new topics in a response. (0-2)
+  'stop':'None' //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
+}
+
+const configuration = new Configuration({
+  apiKey: process.env.AZURE_SECRET_KEY,
+  api_type: "azure",
+  api_base: "https://fact-check.openai.azure.com/",
+  api_version: "2023-07-01-preview",
+});
+const openai = new OpenAI(configuration);
 
 let tavily = {
   "api_key": process.env.TAVILY_SECRET_KEY,
@@ -39,10 +59,10 @@ async function theorySummarization(theory) {
         }
       } else {
         console.log("\nTheory OVER 400! Length: " + theory.length);
-        const summarization = await openai.chat.completions.create({
+        const summarization = await openai.ChatCompletion.completions.create({
           messages: [{"role": "system", "content": promptSummarize},
               {"role": "user", "content": promptTheory}],
-          model: "gpt-4-1106-preview"
+          ...openAiExtraConf
         });
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + theory);
@@ -121,10 +141,10 @@ export const handler = async (event) => {
 
   const promptTheory = inputPrefix + theory + inputSuffix;
 
-  const completion = await openai.chat.completions.create({
+  const completion = await openai.ChatCompletion.completions.create({
       messages: [{"role": "system", "content": promptPrefix + supportingInfo},
           {"role": "user", "content": promptTheory}],
-      model: "gpt-4-1106-preview",
+      ...openAiExtraConf
   });
   let openAiResult = completion.choices[0].message.content; 
   console.log("\nOpenAI:");
@@ -178,10 +198,10 @@ export const OldHandler = async (event) => {
     console.log("\nTheory: " + input.theory);
     const promptTheory = inputPrefix + input.theory + inputSuffix;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await openai.ChatCompletion.completions.create({
         messages: [{"role": "system", "content": promptPrefix},
             {"role": "user", "content": promptTheory}],
-        model: "gpt-4-1106-preview",
+        ...openAiExtraConf
     });
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");

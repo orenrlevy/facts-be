@@ -84,7 +84,7 @@ async function theoryFormmating(fact) {
     const reFormat = await openai.chat.completions.create({
         messages: [{"role": "system", "content": promptFormatter},
             {"role": "user", "content": fact}],
-        model: "gpt-4-1106-preview"
+          ...openAiExtraConf
       });
       let openAiReFormat = reFormat.choices[0].message.content;
       console.log("\nTavili output in our format: " + openAiReFormat);

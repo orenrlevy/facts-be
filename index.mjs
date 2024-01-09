@@ -186,6 +186,9 @@ export const handler = async (event) => {
     'output' : {
       'fact':openAiResult,
       ...factExtraction
+    },
+    'usage': {
+      ...completion.usage
     }
   })
 

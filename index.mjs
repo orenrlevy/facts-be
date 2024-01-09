@@ -172,7 +172,7 @@ export const handler = async (event) => {
     ...factExtraction
   });
 
-  console.log({
+  const logOutput = {
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {
@@ -192,29 +192,10 @@ export const handler = async (event) => {
     'usage': {
       ...completion.usage
     }
-  });
+  };
 
-  await cloudWatchLogger({
-    'timestamp': new Date(),
-    'level': 'DEBUG',
-    'theory': {
-      'original': theory,
-      'length': theory.length,
-      'sum_needed': theory.length >= 400 ? true : false,
-      'sum': theorySum === theory ? "" : theorySum
-    },
-    'web': {
-      'brave_info': braveResult.web.results.length
-    },
-    'output' : {
-      'fact':openAiResult.toString(),
-      ...factExtraction
-    },
-    'model': completion.model, 
-    'usage': {
-      ...completion.usage
-    }
-  });
+  console.log(logOutput);
+  await cloudWatchLogger(logOutput);
 
   return response;
 };
@@ -389,22 +370,6 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
 async function cloudWatchLogger(message) {
   const cloudwatchlogs = new aws.CloudWatchLogs();
 
-  // describeLogStreams to get sequenceToken
-  const describeParams = {
-    limit: 1,
-    logGroupName: "fact-checker"
-  }
-
-  const res = await cloudwatchlogs.describeLogStreams(describeParams).promise();
-  const logStreams = res.logStreams;
-  const sequenceToken = logStreams[0].uploadSequenceToken;
-
-  console.log("-----HERE-----")
-  console.log(res);
-  console.log(logStreams);
-  console.log(sequenceToken);
-
-  // putLogEvents 
   const putLogParams = {
     logEvents: [{
         message: JSON.stringify(message),
@@ -412,7 +377,6 @@ async function cloudWatchLogger(message) {
       }],
       logGroupName: "fact-checker",
       logStreamName: "fact-checker",
-      sequenceToken
   };
 
   return await cloudwatchlogs.putLogEvents(putLogParams).promise();

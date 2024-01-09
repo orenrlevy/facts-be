@@ -58,7 +58,7 @@ async function theorySummarization(theory) {
         }
       } else {
         console.log("\nTheory OVER 400! Length: " + theory.length);
-        const summarization = await openai.ChatCompletion.completions.create({
+        const summarization = await openai.chat.completions.create({
           messages: [{"role": "system", "content": promptSummarize},
               {"role": "user", "content": promptTheory}],
           ...openAiExtraConf
@@ -140,7 +140,7 @@ export const handler = async (event) => {
 
   const promptTheory = inputPrefix + theory + inputSuffix;
 
-  const completion = await openai.ChatCompletion.completions.create({
+  const completion = await openai.chat.completions.create({
       messages: [{"role": "system", "content": promptPrefix + supportingInfo},
           {"role": "user", "content": promptTheory}],
       ...openAiExtraConf
@@ -197,7 +197,7 @@ export const OldHandler = async (event) => {
     console.log("\nTheory: " + input.theory);
     const promptTheory = inputPrefix + input.theory + inputSuffix;
 
-    const completion = await openai.ChatCompletion.completions.create({
+    const completion = await openai.chat.completions.create({
         messages: [{"role": "system", "content": promptPrefix},
             {"role": "user", "content": promptTheory}],
         ...openAiExtraConf

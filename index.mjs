@@ -2,8 +2,7 @@
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
-import logger from './logger';
-import aws from 'aws-sdk';
+//import aws from 'aws-sdk';
 
 /*
 const openai = new OpenAI({
@@ -365,6 +364,7 @@ function makeRequest(host, path, method, body, pathParams, headers, extractGzip)
   });
 }
 
+/*
 async function logger(message) {
     const cloudwatchlogs = new aws.CloudWatchLogs();
 
@@ -392,3 +392,4 @@ async function logger(message) {
 
     return await cloudwatchlogs.putLogEvents(putLogParams).promise();
 };
+*/

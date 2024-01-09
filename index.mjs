@@ -9,6 +9,11 @@ const openai = new OpenAI({
 });
 */
 
+const sources = {
+  "azure": "azure",
+  "openai": "openai"
+}
+
 const openAiExtraConf = {
   'temperature':0.7, //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
   //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
@@ -66,11 +71,10 @@ async function theorySummarization(theory) {
       } else {
         console.log("\nTheory OVER 400! Length: " + theory.length);
         
-        azureParams.body.messages = [
+        const summarization = await getPrediction([
           {"role": "system", "content": promptSummarize},
           {"role": "user", "content": promptTheory}
-        ];
-        const summarization = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
+        ], sources.azure);
 
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + theory);
@@ -91,11 +95,10 @@ async function theorySummarization(theory) {
 async function theoryFormmating(fact) {
   try {
 
-    azureParams.body.messages = [
+    const reFormat = await getPrediction([
       {"role": "system", "content": promptFormatter},
       {"role": "user", "content": fact}
-    ];
-    const reFormat = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
+    ], sources.azure);
 
     let openAiReFormat = reFormat.choices[0].message.content;
     console.log("\nTavili output in our format: " + openAiReFormat);
@@ -151,11 +154,10 @@ export const handler = async (event) => {
 
   const promptTheory = inputPrefix + theory + inputSuffix;
 
-  azureParams.body.messages = [
+  const completion = await getPrediction([
     {"role": "system", "content": promptPrefix + supportingInfo},
     {"role": "user", "content": promptTheory}
-  ];
-  const completion = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
+  ], sources.azure);
 
   let openAiResult = completion.choices[0].message.content; 
   console.log("\nOpenAI:");
@@ -209,11 +211,10 @@ export const OldHandler = async (event) => {
     console.log("\nTheory: " + input.theory);
     const promptTheory = inputPrefix + input.theory + inputSuffix;
 
-    azureParams.body.messages = [
+    const completion = await getPrediction([
       {"role": "system", "content": promptPrefix},
       {"role": "user", "content": promptTheory}
-    ];
-    const completion = await makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
+    ], sources.azure);
 
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");
@@ -286,6 +287,23 @@ function factPartsExtraction(fact) {
     'sum': sumText,
     'x': xText
   }
+}
+
+function getPrediction(messages, source){
+  if (source === sources.openai) {
+    return openai.chat.completions.create({
+      messages: messages,
+      ...openAiExtraConf
+    });
+
+  } else if (source === sources.azure) {
+    return makeAzureRequest(messages);
+  }
+}
+
+function makeAzureRequest(messages) {
+  azureParams.body.messages = messages;
+  return makeRequest(azureParams.host, azureParams.path, azureParams.method, azureParams.body, azureParams.pathParams, azureParams.headers);
 }
 
 function makeRequest(host, path, method, body, pathParams, headers, extractGzip) {

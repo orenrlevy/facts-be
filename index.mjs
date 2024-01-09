@@ -24,6 +24,7 @@ const openai = new OpenAI({
   api_type: "azure",
   api_base: "https://fact-check.openai.azure.com/",
   api_version: "2023-07-01-preview",
+  model: "gpt-4-1106-preview"
 });
 
 let tavily = {

@@ -194,7 +194,7 @@ export const handler = async (event) => {
     }
   });
 
-  cloudWatchLogger({
+  await cloudWatchLogger({
     'timestamp': new Date(),
     'level': 'DEBUG',
     'theory': {

@@ -9,6 +9,16 @@ const openai = new OpenAI({
 });
 */
 
+const openAiExtraConf = {
+  'temperature':0.7, //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
+  //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
+  'top_p':0.95, //Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model’s token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both.
+  'frequency_penalty':0, //Reduce the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response.
+  'presence_penalty':0, //Reduce the chance of repeating any token that has appeared in the text at all so far. This increases the likelihood of introducing new topics in a response. (0-2)
+  'stop':'None', //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
+  'model': 'gpt-4-1106-preview'
+}
+
 let azureParams = {
   'host': 'fact-check.openai.azure.com',
   'path': '/openai/deployments/vereally/chat/completions',
@@ -21,16 +31,6 @@ let azureParams = {
   'headers': {
     'api-key': process.env.AZURE_SECRET_KEY,
   }
-}
-
-const openAiExtraConf = {
-  'temperature':0.7, //Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both.
-  //'max_tokens':800, //Set a limit on the number of tokens per model response. The API supports a maximum of MaxTokensPlaceholderDoNotTranslate tokens shared between the prompt (including system message, examples, message history, and user query) and the model's response. One token is roughly 4 characters for typical English text.
-  'top_p':0.95, //Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model’s token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both.
-  'frequency_penalty':0, //Reduce the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response.
-  'presence_penalty':0, //Reduce the chance of repeating any token that has appeared in the text at all so far. This increases the likelihood of introducing new topics in a response. (0-2)
-  'stop':'None', //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
-  'model': 'gpt-4-1106-preview'
 }
 
 let tavily = {

@@ -1,4 +1,4 @@
-import {Configuration, OpenAI } from "openai";
+import { OpenAI } from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
@@ -19,13 +19,12 @@ const openAiExtraConf = {
   'stop':'None' //Make the model end its response at a desired point. The model response will end before the specified sequence, so it won't contain the stop sequence text. For ChatGPT, using <|im_end|> ensures that the model response doesn't generate a follow-up user query. You can include as many as four stop sequences.
 }
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.AZURE_SECRET_KEY,
   api_type: "azure",
   api_base: "https://fact-check.openai.azure.com/",
   api_version: "2023-07-01-preview",
 });
-const openai = new OpenAI(configuration);
 
 let tavily = {
   "api_key": process.env.TAVILY_SECRET_KEY,

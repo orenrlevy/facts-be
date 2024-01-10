@@ -1,15 +1,15 @@
-//import OpenAI from "openai";
+import OpenAI from "openai";
 import * as https from 'https';
 import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 import aws from 'aws-sdk';
 
 const cloudwatchlogs = new aws.CloudWatchLogs();
-/*
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
-*/
+
 
 const sources = {
   "azure": "azure",

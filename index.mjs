@@ -76,7 +76,7 @@ async function theorySummarization(theory) {
         const summarization = await getPrediction([
           {"role": "system", "content": promptSummarize},
           {"role": "user", "content": promptTheory}
-        ], sources.azure);
+        ], sources.openai);
 
         let openAiSum = summarization.choices[0].message.content;
         console.log("Original Query: " + theory);
@@ -100,7 +100,7 @@ async function theoryFormmating(fact) {
     const reFormat = await getPrediction([
       {"role": "system", "content": promptFormatter},
       {"role": "user", "content": fact}
-    ], sources.azure);
+    ], sources.openai);
 
     let openAiReFormat = reFormat.choices[0].message.content;
     console.log("\nTavili output in our format: " + openAiReFormat);
@@ -159,7 +159,7 @@ export const handler = async (event) => {
   const completion = await getPrediction([
     {"role": "system", "content": promptPrefix + supportingInfo},
     {"role": "user", "content": promptTheory}
-  ], sources.azure);
+  ], sources.openai);
 
   let openAiResult = completion.choices[0].message.content; 
   console.log("\nChatGPT:");
@@ -224,7 +224,7 @@ export const OldHandler = async (event) => {
     const completion = await getPrediction([
       {"role": "system", "content": promptPrefix},
       {"role": "user", "content": promptTheory}
-    ], sources.azure);
+    ], sources.openai);
 
     let openAiResult = completion.choices[0].message.content; 
     console.log("\nOpenAI:");

@@ -157,7 +157,7 @@ export const handler = async (event) => {
             'key': {'S': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-')},
             'theory': {'S': theorySum},
             'fact': {'S': openAiResult},
-            'sources': {'S': braveResult.web.results},
+            'sources': {'B': braveResult.web.results},
             'x': {'S': factExtraction.x},
             'tlds': {'S': factExtraction.tldr},
             'sum': {'S': factExtraction.sum},

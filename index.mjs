@@ -154,13 +154,13 @@ export const handler = async (event) => {
       dynamodb.putItem({
         'TableName': 'facts',
         'Item' : {
-            'key': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-'),
-            'theory': theorySum,
-            'fact': openAiResult,
-            'sources': braveResult.web.results,
-            'x': factExtraction.x,
-            'tlds': factExtraction.tldr,
-            'sum': factExtraction.sum,
+            'key': {'S': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-')},
+            'theory': {'S': theorySum},
+            'fact': {'S': openAiResult},
+            'sources': {'S': braveResult.web.results},
+            'x': {'S': factExtraction.x},
+            'tlds': {'S': factExtraction.tldr},
+            'sum': {'S': factExtraction.sum},
         }
     }, function(err, data) {
         if (err) {

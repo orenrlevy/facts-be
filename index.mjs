@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import * as https from 'https';
-import {promptPrefix, promptPrefixTavili, promptFormatter, promptSummarize, promptSupport} from './prompts.mjs';
+import {promptPrefix, promptSummarize, promptSupport} from './prompts.mjs';
 import zlib from 'zlib';
 import aws from 'aws-sdk';
 
@@ -9,7 +9,6 @@ const cloudwatchlogs = new aws.CloudWatchLogs();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
-
 
 const sources = {
   "azure": "azure",
@@ -39,18 +38,6 @@ let azureParams = {
     'api-key': process.env.AZURE_SECRET_KEY,
   }
 }
-
-let tavily = {
-  "api_key": process.env.TAVILY_SECRET_KEY,
-  "query": null,
-  "search_depth": "basic",
-  "include_answer": true,
-  "include_images": false,
-  "include_raw_content": false,
-  "max_results": 10,
-  "include_domains": [],
-  "exclude_domains": []
-};
 
 let braveHeaders = {
   'Accept-Encoding': 'gzip',
@@ -94,25 +81,6 @@ async function theorySummarization(theory) {
     }
 }
 
-async function theoryFormmating(fact) {
-  try {
-
-    const reFormat = await getPrediction([
-      {"role": "system", "content": promptFormatter},
-      {"role": "user", "content": fact}
-    ], sources.openai);
-
-    let openAiReFormat = reFormat.choices[0].message.content;
-    console.log("\nTavili output in our format: " + openAiReFormat);
-    return openAiReFormat;
-  } catch (error) {
-      console.log("\nError: " + error);
-      response.statusCode = 500;
-      response.message = error;
-      return response;
-  }
-}
-
 function extraceBrave(input) {
   let output = "";
   input.web.results.forEach((result)=>{
@@ -146,7 +114,7 @@ export const handler = async (event) => {
   console.log("\nTheory: " + theory);
 
   let theorySum = await theorySummarization(theory);
-  let theoryQuery = "q="+encodeURI(theorySum.trim());
+  let theoryQuery = "q="+encodeURI(theorySum.trim())+"&count=10";
 
   let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
@@ -200,89 +168,6 @@ export const handler = async (event) => {
   await cloudWatchLogger(theory,"theory","theory");
 
   return response;
-};
-
-export const OldHandler = async (event) => {
-  /* Flow:
-    1. try asking chat gpt - if the answer is good, return to user.
-    2. if the answer contains disclaimers - 
-      2.1 check if the query is over 400 chars - if so, ask gpt to minimize
-      2.2 ask tavili to fetch the query with recent data
-      2.3 ask gpt to format the answer in our format
-      2.4 return to user
-  */
-
-  let response = {
-    statusCode: null,
-    body: null,
-  };
-  try {
-    const input = JSON.parse(event.body);
-    console.log("\nTheory: " + input.theory);
-    const promptTheory = inputPrefix + input.theory + inputSuffix;
-
-    const completion = await getPrediction([
-      {"role": "system", "content": promptPrefix},
-      {"role": "user", "content": promptTheory}
-    ], sources.openai);
-
-    let openAiResult = completion.choices[0].message.content; 
-    console.log("\nOpenAI:");
-    console.log("\nFact: " + openAiResult);
-
-    let excuses = [/*"as of my last training data",
-                    "as of my last update",
-                    "my knowledge is current up to",
-                    "based on information available until",
-                    "my training includes data only up to",
-                    "data available up to",
-                    "my training data includes information until",
-                    "my training data includes information up until",
-                    "training that concluded",
-                    "my information is current up to",
-                    "data available until",
-                    "my last update was",
-                    "Without information beyond",
-                    "knowledge cutoff",
-                    "training on data post april 2023 is critical for verification",*/
-                    "april 2023"]
-    let lowerCaseResult = openAiResult.toLowerCase();
-    let gotExcuses = excuses.some((excuse)=>lowerCaseResult.indexOf(excuse)!==-1);
-
-    if (!gotExcuses) {
-      console.log("\nNo 'knowladge cutoff' use OpenAI");
-      response.statusCode = 200;
-      let factExtraction = factPartsExtraction(openAiResult);
-      response.body = JSON.stringify({
-        'fact':openAiResult,
-        ...factExtraction
-      });
-      return response;
-    } else {
-      console.log("\nResponse contains 'knowladge cutoff' use Tavily");
-
-      tavily.query = await theorySummarization(input.theory);
-      let taviliResult = await makeRequest("api.tavily.com", "/search", "POST", tavily);
-      console.log("\nTavily:");
-      console.log("\nFact: " + taviliResult.answer);
-
-      let openAiReFormat = theoryFormmating(taviliResult.answer)
-
-      response.statusCode = 200;
-      let factExtraction = factPartsExtraction(openAiReFormat);
-      response.body = JSON.stringify({
-        'fact':openAiReFormat, 
-        'sources':taviliResult.results,
-        ...factExtraction
-      });
-      return response;
-    }
-  } catch (error) {
-    console.log("\nError: " + error);
-    response.statusCode = 500;
-    response.message = error;
-    return response;
-  }
 };
 
 function factPartsExtraction(fact) {

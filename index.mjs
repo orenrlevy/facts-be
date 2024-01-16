@@ -144,39 +144,25 @@ export const handler = async (event) => {
   }
   response.body = JSON.stringify(responseBody);
 
-  //store in data base
-  //table name facts
-  //theorySum (fixed)
-  //responseBody {fact, sources, sum, tldr, x}
-  if(theory.toLowerCase().indexOf("yotam_test") !== -1) {
-    console.log('TESTER MODER');
-    try {
-      dynamodb.putItem({
-        'TableName': 'facts',
-        'Item' : {
-            'key': {'S': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-')},
-            'theory': {'S': theorySum},
-            'fact': {'S': openAiResult},
-            'sources': {'S': JSON.stringify(braveResult.web.results)},
-            'x': {'S': factExtraction.x},
-            'tlds': {'S': factExtraction.tldr},
-            'sum': {'S': factExtraction.sum},
-        }
-    }, function(err, data) {
-        if (err) {
-            console.log('Error putting item into dynamodb failed: '+err);
-            context.done('error');
-        }
-        else {
-            console.log('Great success: '+JSON.stringify(data, null, '  '));
-            context.done('Done');
-        }
-    });
-    } catch (err) {
-      console.log("ERROR!!!");
-      console.log(err);
-    }
-  }
+  //push to dynamo db
+  dynamodb.putItem({
+    'TableName': 'facts',
+    'Item' : {
+        'key': {'S': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-')},
+        'theory': {'S': theorySum},
+        'fact': {'S': openAiResult},
+        'sources': {'S': JSON.stringify(braveResult.web.results)},
+        'x': {'S': factExtraction.x},
+        'tlds': {'S': factExtraction.tldr},
+        'sum': {'S': factExtraction.sum},
+    }}, function(err, data) {
+      if (err) {
+        console.log('\n Error putting item into dynamodb: '+err);
+      }
+      else {
+        console.log('\nDynamoDB Put Item Success');
+      }
+  });
 
   const logOutput = {
     'timestamp': new Date(),

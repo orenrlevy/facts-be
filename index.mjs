@@ -5,6 +5,8 @@ import zlib from 'zlib';
 import aws from 'aws-sdk';
 
 const cloudwatchlogs = new aws.CloudWatchLogs();
+const dynamodb = new aws.DynamoDB();
+
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
@@ -114,7 +116,7 @@ export const handler = async (event) => {
   console.log("\nTheory: " + theory);
 
   let theorySum = await theorySummarization(theory);
-  let theoryQuery = "q="+encodeURI(theorySum.trim())+"&count=10";
+  let theoryQuery = "q="+encodeURI(theorySum.trim())+"&count=9";
 
   let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
@@ -135,11 +137,46 @@ export const handler = async (event) => {
 
   response.statusCode = 200;
   let factExtraction = factPartsExtraction(openAiResult);
-  response.body = JSON.stringify({
+  let responseBody = {
     'fact':openAiResult, 
     'sources':braveResult.web.results,
     ...factExtraction
-  });
+  }
+  response.body = JSON.stringify(responseBody);
+
+  //store in data base
+  //table name facts
+  //theorySum (fixed)
+  //responseBody {fact, sources, sum, tldr, x}
+  if(theory.toLowerCase().indexOf("yotam_test") !== -1) {
+    console.log('TESTER MODER');
+    try {
+      dynamodb.putItem({
+        'TableName': 'facts',
+        'Item' : {
+            'key': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-'),
+            'theory': theorySum,
+            'fact': openAiResult,
+            'sources': braveResult.web.results,
+            'x': factExtraction.x,
+            'tlds': factExtraction.tldr,
+            'sum': factExtraction.sum,
+        }
+    }, function(err, data) {
+        if (err) {
+            console.log('Error putting item into dynamodb failed: '+err);
+            context.done('error');
+        }
+        else {
+            console.log('Great success: '+JSON.stringify(data, null, '  '));
+            context.done('Done');
+        }
+    });
+    } catch (err) {
+      console.log("ERROR!!!");
+      console.log(err);
+    }
+  }
 
   const logOutput = {
     'timestamp': new Date(),

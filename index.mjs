@@ -111,8 +111,10 @@ export const handler = async (event) => {
     body: null,
   };
 
+  console.log("-------TEST-------");
+  console.log(event);
   if (event.key) { //fetch ready response
-    console.log('\nDynamoDB Key Fetch')
+    console.log('\nDynamoDB Key Fetch');
     var params = {
       TableName: "facts",
       Key: {

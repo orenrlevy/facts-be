@@ -118,6 +118,9 @@ export const handler = async (event) => {
     var outputStacture = {}
     Object.keys(storedResult).forEach(key=>outputStacture[key]=storedResult[key].S);
     storedResult.sources = JSON.parse(storedResult.sources);
+
+    console.log(storedResult);
+    
     response.statusCode = 200;
     response.body = JSON.stringify(outputStacture);
   } else { //check a new fact

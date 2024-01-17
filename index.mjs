@@ -113,27 +113,9 @@ export const handler = async (event) => {
   const input = JSON.parse(event.body);
 
   if (input.key) { //fetch ready response
-    console.log('\nDynamoDB Key Fetch');
-  
-    var params = {
-      TableName: "facts",
-      Key: {
-        key: { S: input.key },
-      },
-      ProjectionExpression: "ATTRIBUTE_NAME",
-    };
-    
-    // Call DynamoDB to read the item from the table
-    dynamodb.getItem(params, function (err, data) {
-      if (err) {
-        console.log("\nDynamoDB Key Fetch Error", err);
-      } else {
-        console.log("\nDynamoDB Key Fetch Success", data.Item);
-        console.log(data.item);
-        response.body = JSON.stringify(data.Item);
-      }
-    });
-
+    console.log('\nDynamoDB Key Fetch: ' + input.key);
+    let storedResult = await getDynamoResult(input.key);
+    response.body = storedResult;
   } else { //check a new fact
     let theory = input.theory;
     console.log("\nTheory: " + theory);
@@ -318,3 +300,27 @@ async function cloudWatchLogger(message, group, stream) {
 
   return await cloudwatchlogs.putLogEvents(putLogParams).promise();
 };
+
+function getDynamoResult(key) {
+
+  var params = {
+    TableName: "facts",
+    Key: {
+      key: { S: input.key },
+    },
+    ProjectionExpression: "ATTRIBUTE_NAME",
+  };
+
+  return new Promise((resolve, reject) => {
+    dynamodb.getItem(params, function (err, data) {
+      if (err) {
+        console.log("\nDynamoDB Key Fetch Error", err);
+        reject(err);
+      } else {
+        console.log("\nDynamoDB Key Fetch Success", data.Item);
+        console.log(data.item);
+        resolve(data.Item);
+      }
+    });
+  });
+}

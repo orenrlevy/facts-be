@@ -116,6 +116,7 @@ export const handler = async (event) => {
     console.log('\nDynamoDB Key Fetch: ' + input.key);
     let storedResult = await getDynamoResult(input.key);
     response.body = storedResult;
+    console.log(response);
   } else { //check a new fact
     let theory = input.theory;
     console.log("\nTheory: " + theory);
@@ -317,7 +318,6 @@ function getDynamoResult(key) {
         reject(err);
       } else {
         console.log("\nDynamoDB Key Fetch Success: ", data.Item);
-        console.log(data);
         resolve(data.Item);
       }
     });

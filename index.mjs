@@ -115,6 +115,7 @@ export const handler = async (event) => {
   if (input.key) { //fetch ready response
     console.log('\nDynamoDB Key Fetch: ' + input.key);
     let storedResult = await getDynamoResult(input.key);
+    response.statusCode = 200;
     response.body = JSON.stringify(storedResult);
   } else { //check a new fact
     let theory = input.theory;

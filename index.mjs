@@ -304,11 +304,11 @@ async function cloudWatchLogger(message, group, stream) {
 function getDynamoResult(key) {
 
   var params = {
-    TableName: "facts",
-    Key: {
-      key: { S: input.key },
+    'TableName': 'facts',
+    'Key': {
+      'key': { 'S': key },
     },
-    ProjectionExpression: "ATTRIBUTE_NAME",
+    'ProjectionExpression': 'ATTRIBUTE_NAME',
   };
 
   return new Promise((resolve, reject) => {

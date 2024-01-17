@@ -111,90 +111,112 @@ export const handler = async (event) => {
     body: null,
   };
 
-  const input = JSON.parse(event.body);
-  let theory = input.theory;
-  console.log("\nTheory: " + theory);
-
-  let theorySum = await theorySummarization(theory);
-  let theoryQuery = "q="+encodeURIComponent(theorySum.trim())+"&count=9";
-
-  let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
-
-  let braveInfo = extraceBrave(braveResult);
-  console.log('\nSupporting Info: ' + braveInfo);
-  let supportingInfo = promptSupport + braveInfo;
-
-  const promptTheory = inputPrefix + theory + inputSuffix;
-
-  const completion = await getPrediction([
-    {"role": "system", "content": promptPrefix + supportingInfo},
-    {"role": "user", "content": promptTheory}
-  ], sources.openai);
-
-  let openAiResult = completion.choices[0].message.content; 
-  console.log("\nChatGPT:");
-  console.log("\nFact: " + openAiResult);
-
-  response.statusCode = 200;
-  let factExtraction = factPartsExtraction(openAiResult);
-
-  const cleanTheory = theorySum.trim().toLowerCase().replace(/[&\/\\#,+()$~%.'":*?!<>{}]/g, '').replace(/\s+/g, '-');
-  const theoryKey = encodeURIComponent(cleanTheory);
-
-  let responseBody = {
-    'fact':openAiResult, 
-    'sources':braveResult.web.results,
-    'key': theoryKey,
-    ...factExtraction
-  }
-  response.body = JSON.stringify(responseBody);
-
-  //push to dynamo db
-  
-  dynamodb.putItem({
-    'TableName': 'facts',
-    'Item' : {
-        'key': {'S': theoryKey},
-        'theory': {'S': theorySum},
-        'fact': {'S': openAiResult},
-        'sources': {'S': JSON.stringify(braveResult.web.results)},
-        'x': {'S': factExtraction.x},
-        'tlds': {'S': factExtraction.tldr},
-        'sum': {'S': factExtraction.sum},
-    }}, function(err, data) {
+  if (event.key) { //fetch ready response
+    console.log('\nDynamoDB Key Fetch')
+    var params = {
+      TableName: "facts",
+      Key: {
+        'key': { 'S': key },
+      },
+      ProjectionExpression: "ATTRIBUTE_NAME",
+    };
+    
+    // Call DynamoDB to read the item from the table
+    ddb.getItem(params, function (err, data) {
       if (err) {
-        console.log('\n Error putting item into dynamodb: '+err);
+        console.log("\nDynamoDB Key Fetch Error", err);
+      } else {
+        console.log("\nDynamoDB Key Fetch Success", data.Item);
+        console.log(data.item);
+        response.body = JSON.stringify(data.Item);
       }
-      else {
-        console.log('\nDynamoDB Put Item Success');
-      }
-  });
+    });
 
-  const logOutput = {
-    'timestamp': new Date(),
-    'level': 'DEBUG',
-    'theory': {
-      'original': theory,
-      'length': theory.length,
-      'sum_needed': theory.length >= 400 ? true : false,
-      'sum': theorySum === theory ? "" : theorySum
-    },
-    'web': {
-      'brave_info': braveResult.web.results.length
-    },
-    'output' : {
-      'fact':openAiResult.toString(),
+  } else { //check a new fact
+    const input = JSON.parse(event.body);
+    let theory = input.theory;
+    console.log("\nTheory: " + theory);
+
+    let theorySum = await theorySummarization(theory);
+    let theoryQuery = "q="+encodeURIComponent(theorySum.trim())+"&count=9";
+
+    let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
+
+    let braveInfo = extraceBrave(braveResult);
+    console.log('\nSupporting Info: ' + braveInfo);
+    let supportingInfo = promptSupport + braveInfo;
+
+    const promptTheory = inputPrefix + theory + inputSuffix;
+
+    const completion = await getPrediction([
+      {"role": "system", "content": promptPrefix + supportingInfo},
+      {"role": "user", "content": promptTheory}
+    ], sources.openai);
+
+    let openAiResult = completion.choices[0].message.content; 
+    console.log("\nChatGPT:");
+    console.log("\nFact: " + openAiResult);
+
+    response.statusCode = 200;
+    let factExtraction = factPartsExtraction(openAiResult);
+
+    const cleanTheory = theorySum.trim().toLowerCase().replace(/[&\/\\#,+()$~%.'":*?!<>{}]/g, '').replace(/\s+/g, '-');
+    const theoryKey = encodeURIComponent(cleanTheory);
+
+    let responseBody = {
+      'fact':openAiResult, 
+      'sources':braveResult.web.results,
+      'key': theoryKey,
       ...factExtraction
-    },
-    'model': completion.model, 
-    'usage': {
-      ...completion.usage
     }
-  };
+    response.body = JSON.stringify(responseBody);
 
-  console.log(logOutput);
-  await cloudWatchLogger(JSON.stringify(logOutput),"fact-checker","fact-checker");
-  await cloudWatchLogger(theory,"theory","theory");
+    //push to dynamo db
+    dynamodb.putItem({
+      'TableName': 'facts',
+      'Item' : {
+          'key': {'S': theoryKey},
+          'theory': {'S': theorySum},
+          'fact': {'S': openAiResult},
+          'sources': {'S': JSON.stringify(braveResult.web.results)},
+          'x': {'S': factExtraction.x},
+          'tlds': {'S': factExtraction.tldr},
+          'sum': {'S': factExtraction.sum},
+      }}, function(err, data) {
+        if (err) {
+          console.log('\n Error putting item into dynamodb: '+err);
+        }
+        else {
+          console.log('\nDynamoDB Put Item Success');
+        }
+    });
+
+    const logOutput = {
+      'timestamp': new Date(),
+      'level': 'DEBUG',
+      'theory': {
+        'original': theory,
+        'length': theory.length,
+        'sum_needed': theory.length >= 400 ? true : false,
+        'sum': theorySum === theory ? "" : theorySum
+      },
+      'web': {
+        'brave_info': braveResult.web.results.length
+      },
+      'output' : {
+        'fact':openAiResult.toString(),
+        ...factExtraction
+      },
+      'model': completion.model, 
+      'usage': {
+        ...completion.usage
+      }
+    };
+
+    console.log(logOutput);
+    await cloudWatchLogger(JSON.stringify(logOutput),"fact-checker","fact-checker");
+    await cloudWatchLogger(theory,"theory","theory");
+  }
 
   return response;
 };

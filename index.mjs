@@ -117,7 +117,7 @@ export const handler = async (event) => {
     var params = {
       TableName: "facts",
       Key: {
-        'key': { 'S': key },
+        'key': key,
       },
       ProjectionExpression: "ATTRIBUTE_NAME",
     };

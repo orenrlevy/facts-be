@@ -306,9 +306,8 @@ function getDynamoResult(key) {
   var params = {
     'TableName': 'facts',
     'Key': {
-      'key': { 'S': key },
-    },
-    'ProjectionExpression': 'ATTRIBUTE_NAME',
+      'key': key,
+    }
   };
 
   return new Promise((resolve, reject) => {

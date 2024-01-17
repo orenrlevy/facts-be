@@ -306,7 +306,7 @@ function getDynamoResult(key) {
   var params = {
     'TableName': 'facts',
     'Key': {
-      'key': key,
+      'key': { 'S': key },
     }
   };
 

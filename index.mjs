@@ -124,7 +124,7 @@ export const handler = async (event) => {
     console.log("\nTheory: " + theory);
 
     let theorySum = await theorySummarization(theory);
-    let theoryQuery = "q="+encodeURIComponent(theorySum.trim())+"&count=9";
+    let theoryQuery = "q="+encodeURIComponent(theorySum.trim());//+"&count=9";
 
     let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 

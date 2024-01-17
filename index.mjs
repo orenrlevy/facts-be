@@ -110,10 +110,9 @@ export const handler = async (event) => {
     statusCode: null,
     body: null,
   };
+  const input = JSON.parse(event.body);
 
-  console.log("-------TEST-------");
-  console.log(event);
-  if (event.key) { //fetch ready response
+  if (input.key) { //fetch ready response
     console.log('\nDynamoDB Key Fetch');
     var params = {
       TableName: "facts",
@@ -135,7 +134,6 @@ export const handler = async (event) => {
     });
 
   } else { //check a new fact
-    const input = JSON.parse(event.body);
     let theory = input.theory;
     console.log("\nTheory: " + theory);
 

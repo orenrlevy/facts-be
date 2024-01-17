@@ -114,16 +114,17 @@ export const handler = async (event) => {
 
   if (input.key) { //fetch ready response
     console.log('\nDynamoDB Key Fetch');
+  
     var params = {
       TableName: "facts",
       Key: {
-        'key': key,
+        key: { S: input.key },
       },
       ProjectionExpression: "ATTRIBUTE_NAME",
     };
     
     // Call DynamoDB to read the item from the table
-    ddb.getItem(params, function (err, data) {
+    dynamodb.getItem(params, function (err, data) {
       if (err) {
         console.log("\nDynamoDB Key Fetch Error", err);
       } else {

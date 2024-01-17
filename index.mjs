@@ -166,7 +166,7 @@ export const handler = async (event) => {
           'fact': {'S': openAiResult},
           'sources': {'S': JSON.stringify(braveResult.web.results)},
           'x': {'S': factExtraction.x},
-          'tlds': {'S': factExtraction.tldr},
+          'tldr': {'S': factExtraction.tldr},
           'sum': {'S': factExtraction.sum},
       }}, function(err, data) {
         if (err) {

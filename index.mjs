@@ -314,11 +314,11 @@ function getDynamoResult(key) {
   return new Promise((resolve, reject) => {
     dynamodb.getItem(params, function (err, data) {
       if (err) {
-        console.log("\nDynamoDB Key Fetch Error", err);
+        console.log("\nDynamoDB Key Fetch Error: ", err);
         reject(err);
       } else {
-        console.log("\nDynamoDB Key Fetch Success", data.Item);
-        console.log(data.item);
+        console.log("\nDynamoDB Key Fetch Success: ", data.Item);
+        console.log(data);
         resolve(data.Item);
       }
     });

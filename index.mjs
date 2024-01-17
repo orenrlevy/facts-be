@@ -137,19 +137,24 @@ export const handler = async (event) => {
 
   response.statusCode = 200;
   let factExtraction = factPartsExtraction(openAiResult);
+
+  const cleanTheory = theorySum.trim().toLowerCase().replace(/[&\/\\#,+()$~%.'":*?!<>{}]/g, '').replace(/\s+/g, '-');
+  const theoryKey = encodeURIComponent(cleanTheory);
+
   let responseBody = {
     'fact':openAiResult, 
     'sources':braveResult.web.results,
+    'key': theoryKey,
     ...factExtraction
   }
   response.body = JSON.stringify(responseBody);
 
   //push to dynamo db
-  const cleanTheory = theorySum.trim().toLowerCase().replace(/[&\/\\#,+()$~%.'":*?!<>{}]/g, '').replace(/\s+/g, '-');
+  
   dynamodb.putItem({
     'TableName': 'facts',
     'Item' : {
-        'key': {'S': encodeURIComponent(cleanTheory)},
+        'key': {'S': theoryKey},
         'theory': {'S': theorySum},
         'fact': {'S': openAiResult},
         'sources': {'S': JSON.stringify(braveResult.web.results)},

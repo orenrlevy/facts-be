@@ -116,7 +116,7 @@ export const handler = async (event) => {
   console.log("\nTheory: " + theory);
 
   let theorySum = await theorySummarization(theory);
-  let theoryQuery = "q="+encodeURI(theorySum.trim())+"&count=9";
+  let theoryQuery = "q="+encodeURIComponent(theorySum.trim())+"&count=9";
 
   let braveResult = await makeRequest("api.search.brave.com", "/res/v1/web/search", "GET", null, theoryQuery, braveHeaders, true);    
 
@@ -145,10 +145,11 @@ export const handler = async (event) => {
   response.body = JSON.stringify(responseBody);
 
   //push to dynamo db
+  const cleanTheory = theorySum.trim().toLowerCase().replace(/[&\/\\#,+()$~%.'":*?!<>{}]/g, '').replace(/\s+/g, '-');
   dynamodb.putItem({
     'TableName': 'facts',
     'Item' : {
-        'key': {'S': theorySum.toLowerCase().replace(/[^\w @]/g, '').replace(/\s+/g, '-')},
+        'key': {'S': encodeURIComponent(cleanTheory)},
         'theory': {'S': theorySum},
         'fact': {'S': openAiResult},
         'sources': {'S': JSON.stringify(braveResult.web.results)},

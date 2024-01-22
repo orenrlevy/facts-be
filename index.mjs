@@ -168,6 +168,7 @@ export const handler = async (event) => {
           'x': {'S': factExtraction.x},
           'tldr': {'S': factExtraction.tldr},
           'sum': {'S': factExtraction.sum},
+          'timestamp': Date.now()
       }}, function(err, data) {
         if (err) {
           console.log('\n Error putting item into dynamodb: '+err);

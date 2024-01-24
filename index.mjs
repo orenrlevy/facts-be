@@ -157,6 +157,11 @@ export const handler = async (event) => {
     }
     response.body = JSON.stringify(responseBody);
 
+
+    console.log(Date.now());
+    console.log(typeof Date.now());
+
+
     //push to dynamo db
     dynamodb.putItem({
       'TableName': 'facts',
@@ -168,7 +173,7 @@ export const handler = async (event) => {
           'x': {'S': factExtraction.x},
           'tldr': {'S': factExtraction.tldr},
           'sum': {'S': factExtraction.sum},
-          'timestamp': {'S' : Date.now()}
+          'timestamp': {'N' : Date.now()}
       }}, function(err, data) {
         if (err) {
           console.log('\n Error putting item into dynamodb: '+err);
